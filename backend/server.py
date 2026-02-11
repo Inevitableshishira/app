@@ -286,3 +286,30 @@ logger = logging.getLogger(__name__)
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+
+
+@app.get("/create-admin")
+def create_admin():
+    from passlib.context import CryptContext
+    from database import SessionLocal
+    from models import User
+
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    db = SessionLocal()
+
+    admin = db.query(User).filter(User.username == "admin").first()
+    if admin:
+        return {"message": "Admin already exists"}
+
+    new_admin = User(
+        username="admin",
+        password=pwd_context.hash("admin"),
+        role="admin"
+    )
+
+    db.add(new_admin)
+    db.commit()
+    db.close()
+
+    return {"message": "Admin created"}
