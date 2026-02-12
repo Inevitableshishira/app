@@ -35,8 +35,8 @@ const Footer = () => {
             <h2 className="text-5xl md:text-8xl font-serif mb-12 italic leading-none">Let's build <br />tomorrow.</h2>
             <div className="grid grid-cols-2 gap-12 mt-20">
               <div className="space-y-2">
-                <p className="text-white/30 uppercase tracking-widest text-[9px]">Global HQ</p>
-                <p className="text-sm font-light">Milan, Italy <br />Via Design 42</p>
+                <p className="text-white/30 uppercase tracking-widest text-[9px]">Location</p>
+                <p className="text-sm font-light">HSR Layout,Bangalore <br />Via Design 42</p>
               </div>
               <div className="space-y-2">
                 <p className="text-white/30 uppercase tracking-widest text-[9px]">Contact</p>
@@ -118,7 +118,7 @@ const Footer = () => {
               <a key={s} href="#" className="text-[9px] uppercase tracking-widest text-white/40 hover:text-white transition-colors">{s}</a>
             ))}
           </div>
-          <p className="text-[9px] uppercase tracking-[0.3em] text-white/20">© 2024 APEXFORGE STUDIO. ALL RIGHTS RESERVED.</p>
+          <p className="text-[9px] uppercase tracking-[0.3em] text-white/20">© 2026 APEXFORGE STUDIO. ALL RIGHTS RESERVED.</p>
         </div>
       </div>
     </footer>
