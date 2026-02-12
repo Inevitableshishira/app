@@ -36,7 +36,7 @@ const Footer = () => {
             <div className="grid grid-cols-2 gap-12 mt-20">
               <div className="space-y-2">
                 <p className="text-white/30 uppercase tracking-widest text-[9px]">Location</p>
-                <p className="text-sm font-light">HSR Layout,Bangalore <br />Via Design 42</p>
+                <p className="text-sm font-light">HSR Layout,Bangalore </p>
               </div>
               <div className="space-y-2">
                 <p className="text-white/30 uppercase tracking-widest text-[9px]">Contact</p>
@@ -114,7 +114,7 @@ const Footer = () => {
         <div className="pt-20 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-10">
           <Logo color="white" className="h-auto opacity-90 scale-90 md:scale-100" />
           <div className="flex gap-12">
-            {['Instagram', 'LinkedIn', 'Behance'].map(s => (
+            {['Instagram', 'LinkedIn'].map(s => (
               <a key={s} href="#" className="text-[9px] uppercase tracking-widest text-white/40 hover:text-white transition-colors">{s}</a>
             ))}
           </div>
