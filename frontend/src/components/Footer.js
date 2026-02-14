@@ -1,30 +1,35 @@
-import React, { useState } from 'react';
-import Logo from './Logo';
-import axios from 'axios';
+import React, { useState } from "react";
+import Logo from "./Logo";
+import axios from "axios";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const Footer = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [status, setStatus] = useState('idle');
-  const [feedback, setFeedback] = useState('');
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+
+  const [status, setStatus] = useState("idle");
+  const [feedback, setFeedback] = useState("");
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (status === 'loading') return;
+    if (status === "loading") return;
 
-    setStatus('loading');
+    setStatus("loading");
 
     try {
       await axios.post(`${API}/contact`, formData);
-      setStatus('success');
-      setFeedback('Our team will reach out soon.');
-      setFormData({ name: '', email: '', message: '' });
+      setStatus("success");
+      setFeedback("Our team will reach out soon.");
+      setFormData({ name: "", email: "", message: "" });
     } catch (error) {
-      setStatus('error');
-      setFeedback('Something went wrong. Please try again.');
-      console.error('Contact form error:', error);
+      console.error("Contact form error:", error);
+      setStatus("error");
+      setFeedback("Something went wrong. Please try again.");
     }
   };
 
@@ -32,14 +37,14 @@ const Footer = () => {
     <footer id="contact" className="bg-black text-white pt-32 pb-16">
       <div className="max-w-7xl mx-auto px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 mb-40">
-          
+
           {/* LEFT SIDE */}
-          <div className="animate-fade-up">
+          <div>
             <h2 className="text-5xl md:text-8xl font-serif mb-12 italic leading-none">
               Let's build <br /> tomorrow.
             </h2>
 
-            <div className="grid grid-cols-2 gap-12 mt-20">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
               <div className="space-y-2">
                 <p className="text-white/30 uppercase tracking-widest text-[9px]">
                   Location
@@ -57,13 +62,19 @@ const Footer = () => {
                   Contact
                 </p>
                 <p className="text-sm font-light">
-                  <a href="mailto:team@apexforgestudio.com" className="hover:underline">
+                  <a
+                    href="mailto:team@apexforgestudio.com"
+                    className="hover:underline"
+                  >
                     team@apexforgestudio.com
                   </a>
                   <br />
                   Shishira B J
                   <br />
-                  <a href="tel:+919113859879" className="hover:underline">
+                  <a
+                    href="tel:+919113859879"
+                    className="hover:underline"
+                  >
                     +91 9113859879
                   </a>
                 </p>
@@ -71,20 +82,22 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* RIGHT SIDE - CONTACT FORM */}
-          <div className="relative">
-            {status === 'success' ? (
-              <div className="h-full flex flex-col justify-center items-start border border-white/10 p-12 bg-white/5 animate-fade-up">
-                <span className="text-[10px] uppercase tracking-widest text-white/40 mb-4 italic">
+          {/* RIGHT SIDE – CONTACT FORM */}
+          <div>
+            {status === "success" ? (
+              <div className="border border-white/10 p-12 bg-white/5">
+                <span className="text-[10px] uppercase tracking-widest text-white/40 italic">
                   Vision Received
                 </span>
-                <h3 className="text-3xl font-serif mb-6 italic">Thank you.</h3>
-                <p className="text-white/60 text-sm leading-relaxed mb-10 max-w-sm">
+                <h3 className="text-3xl font-serif mt-4 mb-6 italic">
+                  Thank you.
+                </h3>
+                <p className="text-white/60 text-sm mb-10">
                   {feedback}
                 </p>
                 <button
-                  onClick={() => setStatus('idle')}
-                  className="text-[10px] uppercase tracking-widest border-b border-white pb-1 hover:opacity-50 transition-opacity"
+                  onClick={() => setStatus("idle")}
+                  className="text-[10px] uppercase tracking-widest border-b border-white pb-1 hover:opacity-50"
                 >
                   Send another inquiry
                 </button>
@@ -99,7 +112,10 @@ const Footer = () => {
                       placeholder="NAME"
                       value={formData.name}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData({
+                          ...formData,
+                          name: e.target.value,
+                        })
                       }
                       className="w-full bg-transparent outline-none text-[11px] tracking-[0.2em] placeholder:text-white/20"
                     />
@@ -112,7 +128,10 @@ const Footer = () => {
                       placeholder="EMAIL"
                       value={formData.email}
                       onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
+                        setFormData({
+                          ...formData,
+                          email: e.target.value,
+                        })
                       }
                       className="w-full bg-transparent outline-none text-[11px] tracking-[0.2em] placeholder:text-white/20"
                     />
@@ -122,25 +141,30 @@ const Footer = () => {
                 <div className="border-b border-white/20 py-4">
                   <textarea
                     required
-                    rows={3}
+                    rows="3"
                     placeholder="TELL US ABOUT YOUR VISION"
                     value={formData.message}
                     onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
+                      setFormData({
+                        ...formData,
+                        message: e.target.value,
+                      })
                     }
                     className="w-full bg-transparent outline-none text-[11px] tracking-[0.2em] placeholder:text-white/20 resize-none"
                   />
                 </div>
 
                 <button
-                  disabled={status === 'loading'}
+                  disabled={status === "loading"}
                   className="w-full py-6 bg-white text-black text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-white/90 transition-all disabled:opacity-50"
                 >
-                  {status === 'loading' ? 'Processing...' : 'Submit Vision'}
+                  {status === "loading"
+                    ? "Processing..."
+                    : "Submit Vision"}
                 </button>
 
-                {status === 'error' && (
-                  <p className="text-red-400 text-[10px] uppercase tracking-widest mt-4">
+                {status === "error" && (
+                  <p className="text-red-400 text-[10px] uppercase tracking-widest">
                     {feedback}
                   </p>
                 )}
@@ -151,13 +175,19 @@ const Footer = () => {
 
         {/* BOTTOM BAR */}
         <div className="pt-20 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-10">
-          <Logo color="white" className="opacity-90" />
+          <Logo color="white" />
 
           <div className="flex gap-12">
-            <a href="#" className="text-[9px] uppercase tracking-widest text-white/40 hover:text-white transition-colors">
+            <a
+              href="#"
+              className="text-[9px] uppercase tracking-widest text-white/40 hover:text-white"
+            >
               Instagram
             </a>
-            <a href="#" className="text-[9px] uppercase tracking-widest text-white/40 hover:text-white transition-colors">
+            <a
+              href="#"
+              className="text-[9px] uppercase tracking-widest text-white/40 hover:text-white"
+            >
               LinkedIn
             </a>
           </div>
