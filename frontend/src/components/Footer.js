@@ -69,13 +69,13 @@ const Footer = () => {
                     team@apexforgestudio.com
                   </a>
                   <br />
-                  Shishira B J
+                  Shreesha J
                   <br />
                   <a
-                    href="tel:+919113859879"
+                    href="tel:+919448815530"
                     className="hover:underline"
                   >
-                    +91 9113859879
+                    +91 9448815530
                   </a>
                 </p>
               </div>
