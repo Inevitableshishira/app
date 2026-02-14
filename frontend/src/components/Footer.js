@@ -15,6 +15,7 @@ const Footer = () => {
     if (status === 'loading') return;
 
     setStatus('loading');
+
     try {
       await axios.post(`${API}/contact`, formData);
       setStatus('success');
@@ -31,100 +32,139 @@ const Footer = () => {
     <footer id="contact" className="bg-black text-white pt-32 pb-16">
       <div className="max-w-7xl mx-auto px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 mb-40">
+          
+          {/* LEFT SIDE */}
           <div className="animate-fade-up">
-            <h2 className="text-5xl md:text-8xl font-serif mb-12 italic leading-none">Let's build <br />tomorrow.</h2>
+            <h2 className="text-5xl md:text-8xl font-serif mb-12 italic leading-none">
+              Let's build <br /> tomorrow.
+            </h2>
+
             <div className="grid grid-cols-2 gap-12 mt-20">
               <div className="space-y-2">
-                <p className="text-white/30 uppercase tracking-widest text-[9px]">Location</p>
-                <p className="text-sm font-light">ApexForge Studio 
-#34A,2nd floor,22nd Main Rd, Sector 3, HSR Layout, Bengaluru, Karnataka 560102</p>
-            <div className="space-y-2">
-  <p className="text-white/30 uppercase tracking-widest text-[9px]">
-    Contact
-  </p>
-  <p className="text-sm font-light">
-    Team@Apexforgestudio <br />
-    Shishira B J <br />
-    +91 9113859879
-  </p>
-</div>
+                <p className="text-white/30 uppercase tracking-widest text-[9px]">
+                  Location
+                </p>
+                <p className="text-sm font-light">
+                  ApexForge Studio <br />
+                  #34A, 2nd Floor <br />
+                  22nd Main Rd, HSR Layout <br />
+                  Bengaluru, Karnataka 560102
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-white/30 uppercase tracking-widest text-[9px]">
+                  Contact
+                </p>
+                <p className="text-sm font-light">
+                  <a href="mailto:team@apexforgestudio.com" className="hover:underline">
+                    team@apexforgestudio.com
+                  </a>
+                  <br />
+                  Shishira B J
+                  <br />
+                  <a href="tel:+919113859879" className="hover:underline">
+                    +91 9113859879
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
 
+          {/* RIGHT SIDE - CONTACT FORM */}
           <div className="relative">
             {status === 'success' ? (
               <div className="h-full flex flex-col justify-center items-start border border-white/10 p-12 bg-white/5 animate-fade-up">
-                <span className="text-[10px] uppercase tracking-widest text-white/40 mb-4 italic">Vision Received</span>
+                <span className="text-[10px] uppercase tracking-widest text-white/40 mb-4 italic">
+                  Vision Received
+                </span>
                 <h3 className="text-3xl font-serif mb-6 italic">Thank you.</h3>
                 <p className="text-white/60 text-sm leading-relaxed mb-10 max-w-sm">
                   {feedback}
                 </p>
-                <button 
+                <button
                   onClick={() => setStatus('idle')}
                   className="text-[10px] uppercase tracking-widest border-b border-white pb-1 hover:opacity-50 transition-opacity"
-                  data-testid="send-another-button"
                 >
                   Send another inquiry
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleFormSubmit} className="space-y-12" data-testid="contact-form">
+              <form onSubmit={handleFormSubmit} className="space-y-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="border-b border-white/20 py-4 focus-within:border-white transition-colors">
-                    <input 
+                  <div className="border-b border-white/20 py-4">
+                    <input
                       required
-                      type="text" 
+                      type="text"
                       placeholder="NAME"
                       value={formData.name}
-                      onChange={e => setFormData({...formData, name: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       className="w-full bg-transparent outline-none text-[11px] tracking-[0.2em] placeholder:text-white/20"
-                      data-testid="contact-name-input"
                     />
                   </div>
-                  <div className="border-b border-white/20 py-4 focus-within:border-white transition-colors">
-                    <input 
+
+                  <div className="border-b border-white/20 py-4">
+                    <input
                       required
-                      type="email" 
+                      type="email"
                       placeholder="EMAIL"
                       value={formData.email}
-                      onChange={e => setFormData({...formData, email: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
                       className="w-full bg-transparent outline-none text-[11px] tracking-[0.2em] placeholder:text-white/20"
-                      data-testid="contact-email-input"
                     />
                   </div>
                 </div>
-                <div className="border-b border-white/20 py-4 focus-within:border-white transition-colors">
-                  <textarea 
+
+                <div className="border-b border-white/20 py-4">
+                  <textarea
                     required
                     rows={3}
                     placeholder="TELL US ABOUT YOUR VISION"
                     value={formData.message}
-                    onChange={e => setFormData({...formData, message: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, message: e.target.value })
+                    }
                     className="w-full bg-transparent outline-none text-[11px] tracking-[0.2em] placeholder:text-white/20 resize-none"
-                    data-testid="contact-message-input"
-                  ></textarea>
+                  />
                 </div>
-                <button 
+
+                <button
                   disabled={status === 'loading'}
-                  className="w-full py-6 bg-white text-black text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-white/90 active:scale-[0.99] transition-all disabled:opacity-50"
-                  data-testid="contact-submit-button"
+                  className="w-full py-6 bg-white text-black text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-white/90 transition-all disabled:opacity-50"
                 >
                   {status === 'loading' ? 'Processing...' : 'Submit Vision'}
                 </button>
-                {status === 'error' && <p className="text-red-400 text-[10px] uppercase tracking-widest mt-4" data-testid="contact-error">{feedback}</p>}
+
+                {status === 'error' && (
+                  <p className="text-red-400 text-[10px] uppercase tracking-widest mt-4">
+                    {feedback}
+                  </p>
+                )}
               </form>
             )}
           </div>
         </div>
 
+        {/* BOTTOM BAR */}
         <div className="pt-20 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-10">
-          <Logo color="white" className="h-auto opacity-90 scale-90 md:scale-100" />
+          <Logo color="white" className="opacity-90" />
+
           <div className="flex gap-12">
-            {['Instagram', 'LinkedIn'].map(s => (
-              <a key={s} href="#" className="text-[9px] uppercase tracking-widest text-white/40 hover:text-white transition-colors">{s}</a>
-            ))}
+            <a href="#" className="text-[9px] uppercase tracking-widest text-white/40 hover:text-white transition-colors">
+              Instagram
+            </a>
+            <a href="#" className="text-[9px] uppercase tracking-widest text-white/40 hover:text-white transition-colors">
+              LinkedIn
+            </a>
           </div>
-          <p className="text-[9px] uppercase tracking-[0.3em] text-white/20">© 2026 APEXFORGE STUDIO. ALL RIGHTS RESERVED.</p>
+
+          <p className="text-[9px] uppercase tracking-[0.3em] text-white/20">
+            © 2026 APEXFORGE STUDIO. ALL RIGHTS RESERVED.
+          </p>
         </div>
       </div>
     </footer>
