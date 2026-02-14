@@ -36,7 +36,8 @@ const Footer = () => {
             <div className="grid grid-cols-2 gap-12 mt-20">
               <div className="space-y-2">
                 <p className="text-white/30 uppercase tracking-widest text-[9px]">Location</p>
-                <p className="text-sm font-light">HSR Layout,Bangalore </p>
+                <p className="text-sm font-light">ApexForge Studio 
+#34A,2nd floor,22nd Main Rd, Sector 3, HSR Layout, Bengaluru, Karnataka 560102</p>
               </div>
               <div className="space-y-2">
                 <p className="text-white/30 uppercase tracking-widest text-[9px]">Contact</p>
