@@ -43,7 +43,7 @@ const Footer = () => {
     Contact
   </p>
   <p className="text-sm font-light">
-    info@yourdomain.in <br />
+    Team@Apexforgestudio <br />
     Shishira B J <br />
     +91 9113859879
   </p>
