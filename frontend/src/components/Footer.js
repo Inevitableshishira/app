@@ -41,7 +41,7 @@ const Footer = () => {
               </div>
               <div className="space-y-2">
                 <p className="text-white/30 uppercase tracking-widest text-[9px]">Contact</p>
-                <p className="text-sm font-light">studio@apexforge.com</p>
+                <p className="text-sm font-light">studio@apexforge.com<br>Shreesha J <br> +91 9448815530</p>
               </div>
             </div>
           </div>
