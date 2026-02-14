@@ -14,7 +14,7 @@ const Hero = () => {
       <div className="relative z-10 w-full max-w-7xl mx-auto px-8">
         <div className="max-w-2xl animate-fade-up">
           <span className="block text-[10px] uppercase tracking-[0.6em] text-black/40 mb-8">
-            Est. 2012 — Architectural Studio
+            Est. 2026 — Architectural Studio
           </span>
           <h1 className="text-6xl md:text-9xl font-serif leading-[0.9] mb-12">
             The Art <br />
