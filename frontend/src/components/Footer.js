@@ -38,11 +38,16 @@ const Footer = () => {
                 <p className="text-white/30 uppercase tracking-widest text-[9px]">Location</p>
                 <p className="text-sm font-light">ApexForge Studio 
 #34A,2nd floor,22nd Main Rd, Sector 3, HSR Layout, Bengaluru, Karnataka 560102</p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-white/30 uppercase tracking-widest text-[9px]">Contact</p>
-                <p className="text-sm font-light">studio@apexforge.com<br>Shreesha J <br> +91 9448815530</p>
-              </div>
+            <div className="space-y-2">
+  <p className="text-white/30 uppercase tracking-widest text-[9px]">
+    Contact
+  </p>
+  <p className="text-sm font-light">
+    info@yourdomain.in <br />
+    Shishira B J <br />
+    +91 9113859879
+  </p>
+</div>
             </div>
           </div>
 
