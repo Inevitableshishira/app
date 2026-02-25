@@ -80,13 +80,13 @@ const Portfolio = () => {
         {loading ? (
           <div className="text-center py-20">
             <p className="text-sm text-black/40 uppercase tracking-widest">
-              Loading projects...
+              Coming Soon...
             </p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-sm text-black/40 uppercase tracking-widest">
-              No projects found
+              Coming Soon...
             </p>
           </div>
         ) : (
