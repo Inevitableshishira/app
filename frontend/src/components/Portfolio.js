@@ -49,7 +49,6 @@ const Portfolio = () => {
         <div className="flex flex-col md:flex-row justify-between items-baseline mb-24 border-b border-black/5 pb-12 gap-8">
           <div>
             <span className="text-[10px] uppercase tracking-[0.4em] text-black/30 mb-4 block">
-              Archive
             </span>
             <h2 className="text-5xl md:text-7xl font-serif italic">
               Selected Works
