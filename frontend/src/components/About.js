@@ -31,7 +31,7 @@ const About = () => {
             </h2>
 
             <p className="text-black/60 text-sm leading-relaxed max-w-lg font-light">
-              Since 2012, ApexForge has operated at the intersection of brutalist honesty and contemporary minimalism. We remove the noise, leaving only the essential essence of space.
+              Since 2026, ApexForge has operated at the intersection of brutalist honesty and contemporary minimalism. We remove the noise, leaving only the essential essence of space.
             </p>
 
             <div className="grid grid-cols-2 gap-16 border-t border-black/10 pt-12">
