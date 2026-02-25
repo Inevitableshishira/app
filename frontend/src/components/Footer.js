@@ -63,7 +63,7 @@ const Footer = () => {
                 </p>
                 <p className="text-sm font-light">
                   <a
-                    href="mailto:team@apexforgestudio.com"
+                    href="mailto:shreesha@apexforgestudio.in"
                     className="hover:underline"
                   >
                     team@apexforgestudio.com
