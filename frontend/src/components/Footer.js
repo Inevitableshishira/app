@@ -66,7 +66,7 @@ const Footer = () => {
                     href="mailto:shreesha@apexforgestudio.in"
                     className="hover:underline"
                   >
-                    team@apexforgestudio.com
+                    shreesha@apexforgestudio.in
                   </a>
                   <br />
                   Shreesha J
