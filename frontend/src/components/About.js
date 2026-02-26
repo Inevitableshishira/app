@@ -36,15 +36,13 @@ const About = () => {
 
             <div className="grid grid-cols-2 gap-16 border-t border-black/10 pt-12">
               <div>
-                <span className="block text-4xl font-serif">150+</span>
+                <span className="block text-4xl font-serif"></span>
                 <span className="text-[9px] uppercase tracking-widest text-black/30">
-                  Curated Projects
                 </span>
               </div>
               <div>
-                <span className="block text-4xl font-serif">24</span>
+                <span className="block text-4xl font-serif"></span>
                 <span className="text-[9px] uppercase tracking-widest text-black/30">
-                  Metropolises
                 </span>
               </div>
             </div>
