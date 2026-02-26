@@ -24,8 +24,8 @@ const Hero = () => {
 
           {/* Main Heading */}
           <h1 className="text-5xl md:text-7xl font-serif leading-[1.1] mb-16">
-            Bespoke Residential Architecture <br />
-            & Turnkey Office Interiors.
+           <i> Bespoke Residential Architecture <br />
+            & Turnkey Office Interiors.</i>
           </h1>
 
           {/* Buttons */}
