@@ -1,19 +1,23 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import CustomCursor from "./components/CustomCursor";
 import HomePage from './pages/HomePage';
 import AdminPage from './pages/AdminPage';
 import '@/App.css';
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
+    <BrowserRouter>
+      {/* Custom Translucent Cursor (global) */}
+      <CustomCursor />
+
+      <div className="App">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
-      </BrowserRouter>
-    </div>
+      </div>
+    </BrowserRouter>
   );
 }
 
