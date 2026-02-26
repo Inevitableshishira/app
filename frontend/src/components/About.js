@@ -11,14 +11,6 @@ const About = () => {
               alt="Studio space" 
               className="w-full h-[700px] object-cover img-grayscale border border-black/10"
             />
-            <div className="absolute -bottom-10 -right-10 bg-black text-white p-16 max-w-sm hidden md:block">
-              <h4 className="text-3xl font-serif mb-6 italic">
-                "Architecture is frozen music."
-              </h4>
-              <p className="text-white/40 text-[11px] uppercase tracking-widest leading-loose">
-                The studio philosophy centers on structural honesty and absolute monochrome clarity.
-              </p>
-            </div>
           </div>
 
           <div className="space-y-12">
