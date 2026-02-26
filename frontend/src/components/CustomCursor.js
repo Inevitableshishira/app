@@ -7,7 +7,7 @@ const CustomCursor = () => {
     const moveCursor = (e) => {
       if (cursorRef.current) {
         cursorRef.current.style.transform =
-          `translate3d(${e.clientX - 10}px, ${e.clientY - 10}px, 0)`; // adjusted for 20px size
+          `translate3d(${e.clientX - 20}px, ${e.clientY - 20}px, 0)`;
       }
     };
 
@@ -21,7 +21,7 @@ const CustomCursor = () => {
   return (
     <div
       ref={cursorRef}
-      className="fixed top-0 left-0 w-5 h-5 rounded-full pointer-events-none z-[9999]
+      className="fixed top-0 left-0 w-10 h-10 rounded-full pointer-events-none z-[9999]
                  bg-black/10 backdrop-blur-sm border border-black/20"
     />
   );
