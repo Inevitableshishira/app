@@ -23,17 +23,10 @@ const Hero = () => {
           </span>
 
           {/* Main Heading */}
-          <h1 className="text-6xl md:text-8xl font-serif leading-[0.95] mb-16">
-            Bespoke <br />
-            Residential <br />
-            <span className="italic font-normal">Architecture</span>
+          <h1 className="text-5xl md:text-7xl font-serif leading-[1.1] mb-16">
+            Bespoke Residential Architecture <br />
+            & Turnkey Office Interiors.
           </h1>
-
-          {/* Sub Heading */}
-          <h2 className="text-3xl md:text-5xl font-serif leading-[1.1] mb-16">
-            & Turnkey <br />
-            <span className="italic font-normal">Office Interiors.</span>
-          </h2>
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 mt-4">
