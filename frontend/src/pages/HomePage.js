@@ -13,14 +13,59 @@ const HomePage = () => {
         <Hero />
         
         {/* Intro Text Section */}
-        <section className="py-48 px-8 max-w-5xl mx-auto text-center">
-          <h2 className="text-4xl md:text-6xl font-serif leading-[1.1] italic animate-fade-up">
-            "Space is not an empty volume; it is the physical manifestation of silence."
-          </h2>
-          <div className="w-32 h-[1px] bg-black mx-auto mt-20 opacity-20"></div>
-        </section>
+       <section className="py-48 px-8 max-w-5xl mx-auto text-center">
+  <h2 className="text-4xl md:text-6xl font-serif leading-[1.1] italic animate-fade-up">
+    "Space is not an empty volume; it is the physical manifestation of silence."
+  </h2>
+  <div className="w-32 h-[1px] bg-black mx-auto mt-20 opacity-20"></div>
+</section>
 
-        <Portfolio />
+{/* 🔥 ADD THIS SECTION HERE */}
+
+<section className="py-40 px-8 max-w-7xl mx-auto">
+  <h2 className="text-5xl md:text-6xl font-serif italic text-center mb-24">
+    Our Seamless Process
+  </h2>
+
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-16">
+
+    <div className="space-y-6">
+      <span className="text-4xl font-serif opacity-30">01</span>
+      <h3 className="text-xl font-serif italic">Consultation</h3>
+      <p className="text-sm text-black/60 leading-relaxed">
+        We understand your vision and budget.
+      </p>
+    </div>
+
+    <div className="space-y-6">
+      <span className="text-4xl font-serif opacity-30">02</span>
+      <h3 className="text-xl font-serif italic">Design & Planning</h3>
+      <p className="text-sm text-black/60 leading-relaxed">
+        3D visualizations and technical blueprints.
+      </p>
+    </div>
+
+    <div className="space-y-6">
+      <span className="text-4xl font-serif opacity-30">03</span>
+      <h3 className="text-xl font-serif italic">Project Management</h3>
+      <p className="text-sm text-black/60 leading-relaxed">
+        We procure materials and manage on-site labor.
+      </p>
+    </div>
+
+    <div className="space-y-6">
+      <span className="text-4xl font-serif opacity-30">04</span>
+      <h3 className="text-xl font-serif italic">Final Handover</h3>
+      <p className="text-sm text-black/60 leading-relaxed">
+        You move into a fully finished, ready-to-use space.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<Portfolio />
+
         
         <section id="services" className="py-48 bg-black text-white">
           <div className="max-w-7xl mx-auto px-8">
