@@ -12,13 +12,6 @@ const HomePage = () => {
       <main>
         <Hero />
         
-        {/* Intro Text Section */}
-       <section className="py-48 px-8 max-w-5xl mx-auto text-center">
-  <h2 className="text-4xl md:text-6xl font-serif leading-[1.1] italic animate-fade-up">
-    "Space is not an empty volume; it is the physical manifestation of silence."
-  </h2>
-  <div className="w-32 h-[1px] bg-black mx-auto mt-20 opacity-20"></div>
-</section>
 
 {/* 🔥 ADD THIS SECTION HERE */}
 
@@ -33,7 +26,7 @@ const HomePage = () => {
       <span className="text-4xl font-serif opacity-30">01</span>
       <h3 className="text-xl font-serif italic">Consultation</h3>
       <p className="text-sm text-black/60 leading-relaxed">
-        We understand your vision and budget.
+        We understand your vision and budget to define the strategic roadmap of the project.
       </p>
     </div>
 
@@ -41,23 +34,23 @@ const HomePage = () => {
       <span className="text-4xl font-serif opacity-30">02</span>
       <h3 className="text-xl font-serif italic">Design & Planning</h3>
       <p className="text-sm text-black/60 leading-relaxed">
-        3D visualizations and technical blueprints.
+        Detailed technical blueprints and high-fidelity 3D visualizations.
       </p>
     </div>
 
     <div className="space-y-6">
       <span className="text-4xl font-serif opacity-30">03</span>
-      <h3 className="text-xl font-serif italic">Project Management</h3>
+      <h3 className="text-xl font-serif italic">End-to-End Project Execution & Management</h3>
       <p className="text-sm text-black/60 leading-relaxed">
-        We procure materials and manage on-site labor.
+        We take full responsibility for the build. Our team manages all material procurement, vendor coordination, and on-site supervision to ensure flawless delivery.
       </p>
     </div>
 
     <div className="space-y-6">
       <span className="text-4xl font-serif opacity-30">04</span>
-      <h3 className="text-xl font-serif italic">Final Handover</h3>
+      <h3 className="text-xl font-serif italic">Final Handover & Support</h3>
       <p className="text-sm text-black/60 leading-relaxed">
-        You move into a fully finished, ready-to-use space.
+        Final handover and continued assistance for any further support required. You move into a fully finished, ready-to-use space
       </p>
     </div>
 
