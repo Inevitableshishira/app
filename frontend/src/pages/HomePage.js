@@ -12,7 +12,6 @@ const HomePage = () => {
       <main>
         <Hero />
         
-
 {/* 🔥 ADD THIS SECTION HERE */}
 
 <section id="process" className="py-40 px-8 max-w-7xl mx-auto">
