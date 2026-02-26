@@ -12,17 +12,22 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollTo = (id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      const offset = 100;
-      const elementPosition = element.offsetTop - offset;
-      window.scrollTo({
-        top: elementPosition,
-        behavior: 'smooth'
-      });
-    }
-  };
+const scrollTo = (id) => {
+  const element = document.getElementById(id);
+  if (element) {
+    const yOffset = -120; // adjust based on navbar height
+    const y =
+      element.getBoundingClientRect().top +
+      window.pageYOffset +
+      yOffset;
+
+    window.scrollTo({
+      top: y,
+      behavior: "smooth"
+    });
+  }
+};
+
 
   const navItems = [
     { label: 'Our Seamless Process', id: 'process' },
