@@ -17,9 +17,16 @@ const Hero = () => {
             Est. 2026 — Architectural Studio
           </span>
           <h1 className="text-6xl md:text-9xl font-serif leading-[0.9] mb-12">
-            The Art <br />
-            Of <span className="italic font-normal">Precision.</span>
-          </h1>
+  Bespoke <br />
+  Residential <br />
+  <span className="italic font-normal">Architecture.</span>
+</h1>
+
+<h2 className="text-4xl md:text-6xl font-serif leading-[1] mt-10">
+  & Turnkey <br />
+  <span className="italic font-normal">Office Interiors.</span>
+</h2>
+
           <div className="flex flex-col sm:flex-row gap-6">
             <a 
               href="#portfolio" 
