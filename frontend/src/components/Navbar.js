@@ -35,24 +35,24 @@ const Navbar = () => {
     <nav
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
         isScrolled
-          ? 'bg-white/70 backdrop-blur-md border-b border-black/5 py-5'
-          : 'bg-white py-8'
+          ? 'bg-white/70 backdrop-blur-md border-b border-black/5 py-4'
+          : 'bg-white py-6'
       }`}
     >
-      <div className="w-full px-16 flex items-center justify-between">
+      <div className="w-full px-6 md:px-16 flex items-center justify-between">
 
         {/* LEFT — Logo */}
-        <div className="flex items-center">
+        <div className="flex-shrink-0">
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="text-left"
+            className="flex items-center"
           >
             <Logo className="h-auto" />
           </button>
         </div>
 
-        {/* CENTER — Navigation */}
-        <div className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 space-x-14">
+        {/* CENTER — Desktop Navigation Only */}
+        <div className="hidden md:flex space-x-14">
           {navItems.map((item) => (
             <button
               key={item.id}
@@ -65,10 +65,10 @@ const Navbar = () => {
         </div>
 
         {/* RIGHT — Inquire */}
-        <div>
+        <div className="flex-shrink-0">
           <button
             onClick={() => scrollTo('contact')}
-            className="px-10 py-3 border border-black text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-black hover:text-white transition-all"
+            className="px-6 md:px-10 py-2 md:py-3 border border-black text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-black hover:text-white transition-all"
           >
             Inquire
           </button>
