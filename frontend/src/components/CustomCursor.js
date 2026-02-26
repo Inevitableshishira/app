@@ -7,7 +7,7 @@ const CustomCursor = () => {
     const moveCursor = (e) => {
       if (cursorRef.current) {
         cursorRef.current.style.transform =
-          `translate3d(${e.clientX - 20}px, ${e.clientY - 20}px, 0)`;
+          `translate3d(${e.clientX - 15}px, ${e.clientY - 15}px, 0)`;
       }
     };
 
