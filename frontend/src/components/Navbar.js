@@ -15,7 +15,7 @@ const Navbar = () => {
   const scrollTo = (id) => {
     const element = document.getElementById(id);
     if (element) {
-      const offset = 80;
+      const offset = 100; // slightly increased spacing
       const bodyRect = document.body.getBoundingClientRect().top;
       const elementRect = element.getBoundingClientRect().top;
       const elementPosition = elementRect - bodyRect;
@@ -29,8 +29,8 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { label: 'Portfolio', id: 'portfolio' },
     { label: 'Our Seamless Process', id: 'process' },
+    { label: 'Portfolio', id: 'portfolio' },
     { label: 'Services', id: 'services' },
     { label: 'About', id: 'about' }
   ];
@@ -39,30 +39,32 @@ const Navbar = () => {
     <nav
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-700 ${
         isScrolled
-          ? 'bg-white/70 backdrop-blur-xl py-4 border-b border-black/5 shadow-sm'
-          : 'bg-transparent py-8'
+          ? 'bg-white/80 backdrop-blur-xl py-5 border-b border-black/5 shadow-sm'
+          : 'bg-transparent py-10'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-12 flex justify-between items-center">
 
         {/* Logo */}
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="hover:opacity-70 transition-opacity"
-        >
-          <Logo
-            color="black"
-            className="h-auto scale-90 md:scale-100 transition-transform duration-500"
-          />
-        </button>
+        <div className="flex items-center">
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="hover:opacity-70 transition-opacity"
+          >
+            <Logo
+              color="black"
+              className="h-auto scale-100"
+            />
+          </button>
+        </div>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex space-x-12">
+        {/* Navigation */}
+        <div className="hidden md:flex space-x-16">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => scrollTo(item.id)}
-              className="text-[10px] uppercase tracking-[0.4em] font-medium text-black/50 hover:text-black transition-all py-2"
+              className="text-[11px] uppercase tracking-[0.45em] font-medium text-black/50 hover:text-black transition-all"
             >
               {item.label}
             </button>
@@ -72,7 +74,7 @@ const Navbar = () => {
         {/* Inquire Button */}
         <button
           onClick={() => scrollTo('contact')}
-          className="px-8 py-2.5 border border-black text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-black hover:text-white transition-all"
+          className="px-10 py-3 border border-black text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-black hover:text-white transition-all"
         >
           Inquire
         </button>
