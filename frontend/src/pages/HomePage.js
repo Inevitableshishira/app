@@ -61,22 +61,22 @@ const HomePage = () => {
         
         <section id="services" className="py-48 bg-black text-white">
           <div className="max-w-7xl mx-auto px-8">
-            <span className="block text-[10px] uppercase tracking-[0.6em] text-white/30 mb-20 text-center">Capabilities</span>
+            <span className="block text-[10px] uppercase tracking-[0.6em] text-white/30 mb-20 text-center">Services</span>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-24">
               <div className="space-y-8 group">
                 <span className="text-white/20 text-6xl font-serif group-hover:text-white transition-colors duration-500">01.</span>
                 <h3 className="text-2xl font-serif italic">Pure Residential</h3>
-                <p className="text-white/40 text-[13px] leading-relaxed font-light">Absolute sanctuaries designed for private contemplation. Minimalist retreats that emphasize the horizon.</p>
+                <p className="text-white/40 text-[13px] leading-relaxed font-light">Bespoke Architecture & Design "Bespoke residential architecture, from initial concept to the final finishing touch. We manage every detail of your home’s creation to ensure a refined, stress-free build that perfectly reflects your personal vision.</p>
               </div>
               <div className="space-y-8 group">
                 <span className="text-white/20 text-6xl font-serif group-hover:text-white transition-colors duration-500">02.</span>
-                <h3 className="text-2xl font-serif italic">Structural Workspace</h3>
-                <p className="text-white/40 text-[13px] leading-relaxed font-light">High-precision environments that catalyze focus. Architecture optimized for deep technical work.</p>
+                <h3 className="text-2xl font-serif italic">Turnkey Design & Build</h3>
+                <p className="text-white/40 text-[13px] leading-relaxed font-light">Office Space Solutions "Comprehensive office interior solutions engineered for productivity. We handle the entire project lifecycle—from space planning and 3D visualization to material procurement and execution—ensuring a seamless transition into your new workspace.</p>
               </div>
               <div className="space-y-8 group">
                 <span className="text-white/20 text-6xl font-serif group-hover:text-white transition-colors duration-500">03.</span>
-                <h3 className="text-2xl font-serif italic">Urban Monoliths</h3>
-                <p className="text-white/40 text-[13px] leading-relaxed font-light">Mixed-use structures that define city skylines through geometric purity and material honesty.</p>
+                <h3 className="text-2xl font-serif italic">General Contracting</h3>
+                <p className="text-white/40 text-[13px] leading-relaxed font-light">Execution & Site Supervision "High-precision execution for large-scale projects. We provide expert oversight, vendor management, and structural supervision to ensure that complex builds are delivered with absolute technical accuracy and efficiency.</p>
               </div>
             </div>
           </div>
