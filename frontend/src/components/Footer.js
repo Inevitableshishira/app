@@ -50,7 +50,7 @@ const Footer = () => {
                   Location
                 </p>
                 <p className="text-sm font-light">
-                  ApexForge Studio <br />
+                  ApexForge Studio Private Limited<br />
                   #34A, 2nd Floor <br />
                   22nd Main Rd, HSR Layout <br />
                   Bengaluru, Karnataka 560102
