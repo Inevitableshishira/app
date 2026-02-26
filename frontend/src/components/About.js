@@ -14,17 +14,15 @@ const About = () => {
           </div>
 
           <div className="space-y-12">
-            <span className="text-black/30 uppercase tracking-[0.5em] text-[10px] block">
-              Heritage / Vision
-            </span>
-
-            <h2 className="text-6xl md:text-8xl font-serif leading-none">
-              Purity in <br /> Form.
+                
+            <h2 className="text-5xl md:text-8xl font-serif leading-none">
+             Our Philosophy:
             </h2>
 
-            <p className="text-black/60 text-sm leading-relaxed max-w-lg font-light">
-              Since 2026, ApexForge has operated at the intersection of brutalist honesty and contemporary minimalism. We remove the noise, leaving only the essential essence of space.
-            </p>
+            <pre className="text-black/60 text-sm leading-relaxed max-w-lg font-light">
+             The Art of Precision At ApexForge Studio, we believe space is the physical manifestation of purpose. Established to bridge the gap between architectural vision and functional reality, we provide end-to-end solutions for those who value design integrity and operational excellence.
+A Turnkey Approach We remove the "noise" of traditional construction by integrating design and build under one roof. Our process is designed to be seamless, allowing our clients to focus on their lives and businesses while we manage the complexities of the site. From initial structural concepts to the final interior finish, we deliver spaces that are ready for immediate use.
+            </pre>
 
             <div className="grid grid-cols-2 gap-16 border-t border-black/10 pt-12">
               <div>
