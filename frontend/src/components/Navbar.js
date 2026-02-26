@@ -15,7 +15,7 @@ const Navbar = () => {
 const scrollTo = (id) => {
   const element = document.getElementById(id);
   if (element) {
-    const yOffset = -160; // adjust based on navbar height
+    const yOffset = -100; // adjust based on navbar height
     const y =
       element.getBoundingClientRect().top +
       window.pageYOffset +
