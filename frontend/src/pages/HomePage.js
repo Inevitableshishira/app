@@ -22,7 +22,7 @@ const HomePage = () => {
 
 {/* 🔥 ADD THIS SECTION HERE */}
 
-<section className="py-40 px-8 max-w-7xl mx-auto">
+<section id="process" className="py-40 px-8 max-w-7xl mx-auto">
   <h2 className="text-5xl md:text-6xl font-serif italic text-center mb-24">
     Our Seamless Process
   </h2>
