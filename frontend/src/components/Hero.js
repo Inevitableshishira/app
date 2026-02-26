@@ -26,7 +26,7 @@ const Hero = () => {
           <h1 className="text-6xl md:text-8xl font-serif leading-[0.95] mb-16">
             Bespoke <br />
             Residential <br />
-            <span className="italic font-normal">Architecture.</span>
+            <span className="italic font-normal">Architecture</span>
           </h1>
 
           {/* Sub Heading */}
