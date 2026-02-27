@@ -17,11 +17,6 @@ const Hero = () => {
       <div className="relative z-10 w-full lg:w-1/2 px-12">
         <div className="max-w-3xl">
 
-          {/* Studio Label */}
-          <span className="block text-[10px] uppercase tracking-[0.6em] text-black/40 mb-10">
-            Est. 2026 — Architectural Studio
-          </span>
-
           {/* Main Heading */}
           <h1 className="text-5xl md:text-7xl font-serif leading-[1.1] mb-16">
            <i> Bespoke Residential Architecture <br />
