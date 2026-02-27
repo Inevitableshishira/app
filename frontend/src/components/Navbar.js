@@ -27,15 +27,12 @@ const Navbar = () => {
 
       const navH = navRef.current ? navRef.current.offsetHeight : 72;
 
-      // Find the first heading inside the section to scroll to that, not the section top
-      const heading = section.querySelector('h1, h2, h3');
-      const target = heading || section;
+      // Use a named anchor inside the section if present, else fall back to section itself
+      const anchor = section.querySelector('[data-scroll-anchor]') || section;
+      const anchorTop = anchor.getBoundingClientRect().top + window.pageYOffset;
 
-      const targetTop = target.getBoundingClientRect().top + window.pageYOffset;
-
-      // Land so heading sits ~32px below the navbar
       window.scrollTo({
-        top: targetTop - navH - 32,
+        top: anchorTop - navH - 24,
         behavior: 'smooth',
       });
     };
