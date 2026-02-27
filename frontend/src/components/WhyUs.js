@@ -4,7 +4,7 @@ const WhyUs = () => {
   return (
     <section
   id="why"
-  className="bg-white py-40 border-t border-black/5 scroll-mt-24 md:scroll-mt-32 lg:scroll-mt-40"
+  className="bg-white py-40 border-t border-black/5"
 >
       <div className="max-w-6xl mx-auto px-8">
 
