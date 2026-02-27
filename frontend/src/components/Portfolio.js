@@ -1,130 +1,158 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useRef } from 'react';
+import Logo from './Logo';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Portfolio = () => {
-  const [filter, setFilter] = useState("All");
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const categories = ["All", "Residential", "Commercial"];
+const Navbar = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const navRef = useRef(null);
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+      if (menuOpen) setMenuOpen(false);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [menuOpen]);
 
-  const fetchProjects = async () => {
-    try {
-      const response = await axios.get(`${API}/projects`);
-      if (Array.isArray(response.data)) {
-        setProjects(response.data);
-      } else {
-        console.warn("Projects response is not an array:", response.data);
-        setProjects([]);
-      }
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      setProjects([]);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
+  const scrollTo = (id) => {
+    const doScroll = () => {
+      const section = document.getElementById(id);
+      if (!section) return;
+
+      const navH = navRef.current ? navRef.current.offsetHeight : 72;
+
+      // Use a named anchor inside the section if present, else fall back to section itself
+      const anchor = section.querySelector('[data-scroll-anchor]') || section;
+      const anchorTop = anchor.getBoundingClientRect().top + window.pageYOffset;
+
+      window.scrollTo({
+        top: anchorTop - navH - 24,
+        behavior: 'smooth',
+      });
+    };
+
+    if (menuOpen) {
+      setMenuOpen(false);
+      setTimeout(doScroll, 350);
+    } else {
+      doScroll();
     }
   };
 
-  const safeProjects = Array.isArray(projects) ? projects : [];
-
-  const filtered =
-    filter === "All"
-      ? safeProjects
-      : safeProjects.filter((p) => p.category === filter);
+  const navItems = [
+    { label: 'Our Seamless Process', id: 'process' },
+    { label: 'Portfolio', id: 'portfolio' },
+    { label: 'Services', id: 'services' },
+    { label: 'About', id: 'about' },
+    { label: 'Why Us', id: 'why' },
+  ];
 
   return (
-    <section id="portfolio" className="py-40 bg-white">
-      <div className="max-w-7xl mx-auto px-8">
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row justify-between items-baseline mb-24 border-b border-black/5 pb-12 gap-8">
-          <div>
-            <span className="text-[10px] uppercase tracking-[0.4em] text-black/30 mb-4 block">
-            </span>
-            <h2 data-scroll-anchor className="text-5xl md:text-7xl font-serif italic">
-              Selected Works
-            </h2>
+    <>
+      <nav
+        ref={navRef}
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+          isScrolled
+            ? 'bg-white/70 backdrop-blur-md border-b border-black/5 py-4'
+            : 'bg-white py-6'
+        }`}
+      >
+        <div className="w-full px-6 md:px-16 flex items-center justify-between">
+
+          {/* LEFT — Logo */}
+          <div className="flex-shrink-0">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="flex items-center"
+            >
+              <Logo className="h-auto" />
+            </button>
           </div>
 
-          <div className="flex flex-wrap gap-10">
-            {categories.map((cat) => (
+          {/* CENTER — Desktop Navigation */}
+          <div className="hidden md:flex space-x-14">
+            {navItems.map((item) => (
               <button
-                key={cat}
-                onClick={() => setFilter(cat)}
-                className={`text-[10px] uppercase tracking-[0.3em] transition-all relative pb-2 ${
-                  filter === cat
-                    ? "text-black"
-                    : "text-black/30 hover:text-black"
-                }`}
+                key={item.id}
+                onClick={() => scrollTo(item.id)}
+                className="text-[11px] uppercase tracking-[0.45em] font-medium text-black/60 hover:text-black transition-all"
               >
-                {cat}
-                {filter === cat && (
-                  <span className="absolute bottom-0 left-0 w-full h-[1px] bg-black"></span>
-                )}
+                {item.label}
               </button>
             ))}
           </div>
+
+          {/* RIGHT — Inquire + Hamburger */}
+          <div className="flex items-center gap-4 flex-shrink-0">
+            <button
+              onClick={() => scrollTo('contact')}
+              className="px-6 md:px-10 py-2 md:py-3 border border-black text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-black hover:text-white transition-all"
+            >
+              Inquire
+            </button>
+
+            {/* Hamburger — mobile only */}
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-[5px]"
+              aria-label="Toggle menu"
+            >
+              <span className={`block w-6 h-[1.5px] bg-black transition-all duration-300 origin-center ${menuOpen ? 'rotate-45 translate-y-[6.5px]' : ''}`} />
+              <span className={`block w-6 h-[1.5px] bg-black transition-all duration-300 ${menuOpen ? 'opacity-0 scale-x-0' : ''}`} />
+              <span className={`block w-6 h-[1.5px] bg-black transition-all duration-300 origin-center ${menuOpen ? '-rotate-45 -translate-y-[6.5px]' : ''}`} />
+            </button>
+          </div>
+
         </div>
+      </nav>
 
-        {/* CONTENT */}
-        {loading ? (
-          <div className="text-center py-20">
-            <p className="text-sm text-black/40 uppercase tracking-widest">
-              Coming Soon...
-            </p>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-sm text-black/40 uppercase tracking-widest">
-              Coming Soon...
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-32">
-            {filtered.map((p, i) => (
-              <div
-                key={p.id || i}
-                className="group animate-fade-up"
-                style={{ animationDelay: `${i * 100}ms` }}
-              >
-                <div className="relative overflow-hidden aspect-[16/10] bg-stone-100 border border-black/5 mb-8">
-                  <img
-                    src={p.image}
-                    alt={p.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-                  />
-                </div>
+      {/* Mobile Fullscreen Menu Overlay */}
+      <div
+        className={`fixed inset-0 z-40 bg-white flex flex-col justify-center items-center transition-all duration-500 md:hidden ${
+          menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-black/10" />
 
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <p className="text-[9px] uppercase tracking-widest text-black/30">
-                      {p.location} — {p.year}
-                    </p>
-                    <h3 className="text-2xl font-serif italic">
-                      {p.title}
-                    </h3>
-                    <p className="text-sm text-black/60 mt-2">
-                      {p.description}
-                    </p>
-                  </div>
+        <nav className="flex flex-col items-center gap-10 w-full px-8">
+          {navItems.map((item, i) => (
+            <button
+              key={item.id}
+              onClick={() => scrollTo(item.id)}
+              className="text-[12px] uppercase tracking-[0.5em] font-medium text-black/40 hover:text-black transition-all duration-300 w-full text-center py-2 border-b border-black/5"
+              style={{
+                transitionDelay: menuOpen ? `${i * 60}ms` : '0ms',
+                transform: menuOpen ? 'translateY(0)' : 'translateY(12px)',
+                opacity: menuOpen ? 1 : 0,
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
 
-                  <span className="text-[8px] border border-black/10 px-3 py-1 uppercase tracking-widest text-black/40">
-                    {p.category}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+          <button
+            onClick={() => scrollTo('contact')}
+            className="mt-6 px-12 py-4 bg-black text-white text-[11px] uppercase tracking-[0.4em] font-bold hover:bg-white hover:text-black border border-black transition-all duration-300 w-full"
+            style={{
+              transitionDelay: menuOpen ? `${navItems.length * 60}ms` : '0ms',
+              transform: menuOpen ? 'translateY(0)' : 'translateY(12px)',
+              opacity: menuOpen ? 1 : 0,
+            }}
+          >
+            Inquire
+          </button>
+        </nav>
+
+        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-black/10" />
       </div>
-    </section>
+    </>
   );
 };
 
-export default Portfolio;
+export default Navbar;
