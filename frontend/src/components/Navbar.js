@@ -99,8 +99,8 @@ const Navbar = () => {
                     relative px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.4em] font-medium
                     transition-all duration-300
                     ${isActive
-                      ? 'text-black bg-black/8 shadow-sm'
-                      : 'text-black/50 hover:text-black hover:bg-black/5'
+                      ? 'text-black bg-black/[0.04] border border-black/20'
+                      : 'text-black/50 hover:text-black border border-transparent'
                     }
                   `}
                 >
