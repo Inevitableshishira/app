@@ -15,7 +15,7 @@ const HomePage = () => {
         <Hero />
 
         {/* PROCESS SECTION */}
-        <section id="process" className="py-40 px-8 max-w-7xl mx-auto scroll-mt-24 md:scroll-mt-32 lg:scroll-mt-40">
+        <section id="process" className="py-40 px-8 max-w-7xl mx-auto">
           <h2 className="text-5xl md:text-6xl font-serif italic text-center mb-24">
             Our Seamless Process
           </h2>
@@ -64,7 +64,7 @@ const HomePage = () => {
         <Portfolio />
 
         {/* SERVICES */}
-        <section id="services" className="py-48 bg-black text-white scroll-mt-24 md:scroll-mt-32 lg:scroll-mt-40">
+        <section id="services" className="py-48 bg-black text-white">
           <div className="max-w-7xl mx-auto px-8">
             <span className="block text-[10px] uppercase tracking-[0.6em] text-white/30 mb-20 text-center">
               Services
