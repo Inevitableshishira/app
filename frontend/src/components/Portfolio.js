@@ -43,7 +43,7 @@ const Portfolio = () => {
       : safeProjects.filter((p) => p.category === filter);
 
   return (
-    <section id="portfolio" className="py-40 bg-white">
+    <section id="portfolio" className="py-40 bg-white scroll-mt-24 md:scroll-mt-32 lg:scroll-mt-40">
       <div className="max-w-7xl mx-auto px-8">
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-baseline mb-24 border-b border-black/5 pb-12 gap-8">
