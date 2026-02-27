@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Logo from './Logo';
 
 const Navbar = () => {
@@ -6,40 +6,41 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const navRef = useRef(null);
+  const menuOpenRef = useRef(false);
+
+  // Keep ref in sync so scroll handler always has fresh value without re-registering
+  useEffect(() => {
+    menuOpenRef.current = menuOpen;
+  }, [menuOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
-      if (menuOpen) setMenuOpen(false);
 
-      // Detect which section is currently in view
+      // Active section detection
       const sectionIds = ['process', 'portfolio', 'services', 'about', 'why'];
       const navH = navRef.current ? navRef.current.offsetHeight : 72;
-
       let current = '';
       for (const id of sectionIds) {
         const el = document.getElementById(id);
         if (!el) continue;
-        const top = el.getBoundingClientRect().top;
-        // Section is "active" when its top is above the middle of the viewport
-        if (top - navH - 40 <= 0) {
-          current = id;
-        }
+        if (el.getBoundingClientRect().top - navH - 40 <= 0) current = id;
       }
       setActiveSection(current);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // run once on mount
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [menuOpen]);
+  }, []); // ← no dependencies, registers once only
 
+  // Body scroll lock
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [menuOpen]);
 
-  const scrollTo = (id) => {
+  const scrollTo = useCallback((id) => {
     const doScroll = () => {
       const section = document.getElementById(id);
       if (!section) return;
@@ -49,13 +50,13 @@ const Navbar = () => {
       window.scrollTo({ top: anchorTop - navH - 24, behavior: 'smooth' });
     };
 
-    if (menuOpen) {
+    if (menuOpenRef.current) {
       setMenuOpen(false);
       setTimeout(doScroll, 350);
     } else {
       doScroll();
     }
-  };
+  }, []);
 
   const navItems = [
     { label: 'Our Seamless Process', id: 'process' },
@@ -87,7 +88,7 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* CENTER — Desktop Navigation */}
+          {/* CENTER — Desktop Navigation with pill */}
           <div className="hidden md:flex items-center space-x-2">
             {navItems.map((item) => {
               const isActive = activeSection === item.id;
@@ -96,7 +97,7 @@ const Navbar = () => {
                   key={item.id}
                   onClick={() => scrollTo(item.id)}
                   className={`
-                    relative px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.4em] font-medium
+                    px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.4em] font-medium
                     transition-all duration-300
                     ${isActive
                       ? 'text-black bg-black/[0.04] border border-black/20'
@@ -121,7 +122,7 @@ const Navbar = () => {
 
             {/* Hamburger — mobile only */}
             <button
-              onClick={() => setMenuOpen(!menuOpen)}
+              onClick={() => setMenuOpen(prev => !prev)}
               className="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-[5px]"
               aria-label="Toggle menu"
             >
@@ -134,34 +135,37 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile Fullscreen Menu Overlay */}
+      {/* Mobile Fullscreen Menu Overlay — z-[60] so it sits above navbar */}
       <div
-        className={`fixed inset-0 z-40 bg-white flex flex-col justify-center items-center transition-all duration-500 md:hidden ${
+        className={`fixed inset-0 z-[60] bg-white flex flex-col justify-center items-center transition-all duration-500 md:hidden ${
           menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-black/10" />
+        {/* Close button at top right */}
+        <button
+          onClick={() => setMenuOpen(false)}
+          className="absolute top-5 right-6 flex flex-col justify-center items-center w-8 h-8 gap-[5px]"
+          aria-label="Close menu"
+        >
+          <span className="block w-6 h-[1.5px] bg-black rotate-45 translate-y-[0.75px]" />
+          <span className="block w-6 h-[1.5px] bg-black -rotate-45 -translate-y-[0.75px]" />
+        </button>
 
         <nav className="flex flex-col items-center gap-10 w-full px-8">
-          {navItems.map((item, i) => {
-            const isActive = activeSection === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => scrollTo(item.id)}
-                className={`text-[12px] uppercase tracking-[0.5em] font-medium transition-all duration-300 w-full text-center py-2 border-b border-black/5 ${
-                  isActive ? 'text-black' : 'text-black/40 hover:text-black'
-                }`}
-                style={{
-                  transitionDelay: menuOpen ? `${i * 60}ms` : '0ms',
-                  transform: menuOpen ? 'translateY(0)' : 'translateY(12px)',
-                  opacity: menuOpen ? 1 : 0,
-                }}
-              >
-                {item.label}
-              </button>
-            );
-          })}
+          {navItems.map((item, i) => (
+            <button
+              key={item.id}
+              onClick={() => scrollTo(item.id)}
+              className="text-[12px] uppercase tracking-[0.5em] font-medium text-black/40 hover:text-black transition-all duration-300 w-full text-center py-2 border-b border-black/5"
+              style={{
+                transitionDelay: menuOpen ? `${i * 60}ms` : '0ms',
+                transform: menuOpen ? 'translateY(0)' : 'translateY(12px)',
+                opacity: menuOpen ? 1 : 0,
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
 
           <button
             onClick={() => scrollTo('contact')}
@@ -175,8 +179,6 @@ const Navbar = () => {
             Inquire
           </button>
         </nav>
-
-        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-black/10" />
       </div>
     </>
   );
