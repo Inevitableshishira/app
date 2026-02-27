@@ -1,45 +1,48 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Logo from './Logo';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const navRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
-      // Close menu on scroll
       if (menuOpen) setMenuOpen(false);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [menuOpen]);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [menuOpen]);
 
   const scrollTo = (id) => {
     setMenuOpen(false);
-    setTimeout(() => {
+
+    const doScroll = () => {
       const element = document.getElementById(id);
       if (!element) return;
 
-      const navbarHeight = 72; // fixed navbar height
-      const offset = 32;       // a little breathing room below navbar
-      const elementTop = element.getBoundingClientRect().top + window.pageYOffset;
+      // Measure actual navbar height dynamically at scroll time
+      const navbarHeight = navRef.current ? navRef.current.offsetHeight : 72;
+      const gap = 24; // breathing room below navbar
 
-      window.scrollTo({
-        top: elementTop - navbarHeight - offset,
-        behavior: 'smooth',
-      });
-    }, menuOpen ? 320 : 0); // wait for menu to close first on mobile
+      const elementTop = element.getBoundingClientRect().top + window.pageYOffset;
+      const target = elementTop - navbarHeight - gap;
+
+      window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+    };
+
+    // Wait for mobile menu close animation before scrolling
+    if (menuOpen) {
+      setTimeout(doScroll, 320);
+    } else {
+      doScroll();
+    }
   };
 
   const navItems = [
@@ -53,6 +56,7 @@ const Navbar = () => {
   return (
     <>
       <nav
+        ref={navRef}
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
           isScrolled
             ? 'bg-white/70 backdrop-blur-md border-b border-black/5 py-4'
@@ -96,7 +100,7 @@ const Navbar = () => {
             {/* Hamburger — mobile only */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-[5px] group"
+              className="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-[5px]"
               aria-label="Toggle menu"
             >
               <span
@@ -123,12 +127,9 @@ const Navbar = () => {
       {/* Mobile Fullscreen Menu Overlay */}
       <div
         className={`fixed inset-0 z-40 bg-white flex flex-col justify-center items-center transition-all duration-500 md:hidden ${
-          menuOpen
-            ? 'opacity-100 pointer-events-auto'
-            : 'opacity-0 pointer-events-none'
+          menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       >
-        {/* Decorative top bar */}
         <div className="absolute top-0 left-0 w-full h-[1px] bg-black/10" />
 
         <nav className="flex flex-col items-center gap-10 w-full px-8">
@@ -136,7 +137,7 @@ const Navbar = () => {
             <button
               key={item.id}
               onClick={() => scrollTo(item.id)}
-              className={`text-[12px] uppercase tracking-[0.5em] font-medium text-black/40 hover:text-black transition-all duration-300 w-full text-center py-2 border-b border-black/5`}
+              className="text-[12px] uppercase tracking-[0.5em] font-medium text-black/40 hover:text-black transition-all duration-300 w-full text-center py-2 border-b border-black/5"
               style={{
                 transitionDelay: menuOpen ? `${i * 60}ms` : '0ms',
                 transform: menuOpen ? 'translateY(0)' : 'translateY(12px)',
@@ -160,7 +161,6 @@ const Navbar = () => {
           </button>
         </nav>
 
-        {/* Decorative bottom bar */}
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-black/10" />
       </div>
     </>
