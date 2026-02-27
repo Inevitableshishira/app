@@ -2,7 +2,10 @@ import React from 'react';
 
 const WhyUs = () => {
   return (
-    <section id="why" className="bg-white py-40 border-t border-black/5">
+    <section
+  id="why"
+  className="bg-white py-40 border-t border-black/5 scroll-mt-40"
+>
       <div className="max-w-6xl mx-auto px-8">
 
         {/* Section Title */}
