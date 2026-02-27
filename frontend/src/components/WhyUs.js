@@ -18,25 +18,12 @@ const WhyUs = () => {
         {/* Points */}
         <div className="space-y-24">
 
-          {/* Item 1 */}
+         
+
+     
           <div className="grid grid-cols-1 md:grid-cols-6 gap-12 items-start">
             <div className="md:col-span-1 text-6xl font-serif text-black/20">
               01
-            </div>
-            <div className="md:col-span-5">
-              <h3 className="text-2xl font-serif mb-6">
-                Design-Led Execution
-              </h3>
-              <p className="text-base md:text-lg text-black/70 leading-relaxed font-light max-w-2xl">
-                 We curate environments that balance aesthetic beauty with functional intent.
-              </p>
-            </div>
-          </div>
-
-          {/* Item 2 */}
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-12 items-start">
-            <div className="md:col-span-1 text-6xl font-serif text-black/20">
-              02
             </div>
             <div className="md:col-span-5">
               <h3 className="text-2xl font-serif mb-6">
@@ -48,10 +35,10 @@ const WhyUs = () => {
             </div>
           </div>
 
-          {/* Item 3 */}
+      
           <div className="grid grid-cols-1 md:grid-cols-6 gap-12 items-start">
             <div className="md:col-span-1 text-6xl font-serif text-black/20">
-              03
+              02
             </div>
             <div className="md:col-span-5">
               <h3 className="text-2xl font-serif mb-6">
@@ -59,6 +46,20 @@ const WhyUs = () => {
               </h3>
               <p className="text-base md:text-lg text-black/70 leading-relaxed font-light max-w-2xl">
               We only commit to what we can truly deliver, building long-term relationships rooted in absolute transparency.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-12 items-start">
+            <div className="md:col-span-1 text-6xl font-serif text-black/20">
+              03
+            </div>
+            <div className="md:col-span-5">
+              <h3 className="text-2xl font-serif mb-6">
+                Design-Led Execution
+              </h3>
+              <p className="text-base md:text-lg text-black/70 leading-relaxed font-light max-w-2xl">
+                 We curate environments that balance aesthetic beauty with functional intent.
               </p>
             </div>
           </div>
