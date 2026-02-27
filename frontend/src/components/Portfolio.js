@@ -9,7 +9,7 @@ const Portfolio = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const categories = ["All", "Residential", "Commercial", "Urban"];
+  const categories = ["All", "Residential", "Commercial"];
 
   useEffect(() => {
     fetchProjects();
@@ -18,8 +18,6 @@ const Portfolio = () => {
   const fetchProjects = async () => {
     try {
       const response = await axios.get(`${API}/projects`);
-
-      // ✅ SAFETY CHECK — Prevent white screen crash
       if (Array.isArray(response.data)) {
         setProjects(response.data);
       } else {
@@ -28,13 +26,12 @@ const Portfolio = () => {
       }
     } catch (error) {
       console.error("Error fetching projects:", error);
-      setProjects([]); // fallback safe state
+      setProjects([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ DOUBLE SAFETY CHECK
   const safeProjects = Array.isArray(projects) ? projects : [];
 
   const filtered =
@@ -43,13 +40,12 @@ const Portfolio = () => {
       : safeProjects.filter((p) => p.category === filter);
 
   return (
-    <section id="portfolio" className="py-40 bg-white scroll-mt-24 md:scroll-mt-32 lg:scroll-mt-40">
+    <section id="portfolio" className="py-40 bg-white">
       <div className="max-w-7xl mx-auto px-8">
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-baseline mb-24 border-b border-black/5 pb-12 gap-8">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.4em] text-black/30 mb-4 block">
-            </span>
+            <span className="text-[10px] uppercase tracking-[0.4em] text-black/30 mb-4 block"></span>
             <h2 className="text-5xl md:text-7xl font-serif italic">
               Selected Works
             </h2>
@@ -109,12 +105,8 @@ const Portfolio = () => {
                     <p className="text-[9px] uppercase tracking-widest text-black/30">
                       {p.location} — {p.year}
                     </p>
-                    <h3 className="text-2xl font-serif italic">
-                      {p.title}
-                    </h3>
-                    <p className="text-sm text-black/60 mt-2">
-                      {p.description}
-                    </p>
+                    <h3 className="text-2xl font-serif italic">{p.title}</h3>
+                    <p className="text-sm text-black/60 mt-2">{p.description}</p>
                   </div>
 
                   <span className="text-[8px] border border-black/10 px-3 py-1 uppercase tracking-widest text-black/40">
