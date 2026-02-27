@@ -47,7 +47,7 @@ const Portfolio = () => {
           <div>
             <span className="text-[10px] uppercase tracking-[0.4em] text-black/30 mb-4 block">
             </span>
-            <h2 className="text-5xl md:text-7xl font-serif italic">
+            <h2 data-scroll-anchor className="text-5xl md:text-7xl font-serif italic">
               Selected Works
             </h2>
           </div>
