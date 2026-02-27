@@ -33,7 +33,8 @@ const scrollTo = (id) => {
     { label: 'Our Seamless Process', id: 'process' },
     { label: 'Portfolio', id: 'portfolio' },
     { label: 'Services', id: 'services' },
-    { label: 'About', id: 'about' }
+    { label: 'About', id: 'about' },
+    { label: 'Why Us', id: 'why' }
   ];
 
   return (
