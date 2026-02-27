@@ -4,7 +4,7 @@ const About = () => {
   return (
     <section
       id="about"
-      className="bg-white py-40 border-t border-black/5"
+      className="bg-white py-40 border-t border-black/5 scroll-mt-24 md:scroll-mt-32 lg:scroll-mt-40"
     >
       <div className="max-w-6xl mx-auto px-8">
 
