@@ -31,20 +31,15 @@ const Navbar = () => {
       const element = document.getElementById(id);
       if (!element) return;
 
-      const navbarHeight = 80; // approx fixed navbar height
-      const elementRect = element.getBoundingClientRect();
-      const elementTop = elementRect.top + window.pageYOffset;
-      const elementHeight = elementRect.height;
-      const viewportHeight = window.innerHeight;
-
-      // Center the section in viewport
-      const scrollTarget = elementTop - (viewportHeight / 2) + (elementHeight / 2);
+      const navbarHeight = 72; // fixed navbar height
+      const offset = 32;       // a little breathing room below navbar
+      const elementTop = element.getBoundingClientRect().top + window.pageYOffset;
 
       window.scrollTo({
-        top: Math.max(0, scrollTarget - navbarHeight / 2),
+        top: elementTop - navbarHeight - offset,
         behavior: 'smooth',
       });
-    }, menuOpen ? 300 : 0); // small delay after menu closes
+    }, menuOpen ? 320 : 0); // wait for menu to close first on mobile
   };
 
   const navItems = [
