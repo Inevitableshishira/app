@@ -4,14 +4,33 @@ import Logo from './Logo';
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
   const navRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
       if (menuOpen) setMenuOpen(false);
+
+      // Detect which section is currently in view
+      const sectionIds = ['process', 'portfolio', 'services', 'about', 'why'];
+      const navH = navRef.current ? navRef.current.offsetHeight : 72;
+
+      let current = '';
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const top = el.getBoundingClientRect().top;
+        // Section is "active" when its top is above the middle of the viewport
+        if (top - navH - 40 <= 0) {
+          current = id;
+        }
+      }
+      setActiveSection(current);
     };
-    window.addEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // run once on mount
     return () => window.removeEventListener('scroll', handleScroll);
   }, [menuOpen]);
 
@@ -24,17 +43,10 @@ const Navbar = () => {
     const doScroll = () => {
       const section = document.getElementById(id);
       if (!section) return;
-
       const navH = navRef.current ? navRef.current.offsetHeight : 72;
-
-      // Use a named anchor inside the section if present, else fall back to section itself
       const anchor = section.querySelector('[data-scroll-anchor]') || section;
       const anchorTop = anchor.getBoundingClientRect().top + window.pageYOffset;
-
-      window.scrollTo({
-        top: anchorTop - navH - 24,
-        behavior: 'smooth',
-      });
+      window.scrollTo({ top: anchorTop - navH - 24, behavior: 'smooth' });
     };
 
     if (menuOpen) {
@@ -76,16 +88,26 @@ const Navbar = () => {
           </div>
 
           {/* CENTER — Desktop Navigation */}
-          <div className="hidden md:flex space-x-14">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => scrollTo(item.id)}
-                className="text-[11px] uppercase tracking-[0.45em] font-medium text-black/60 hover:text-black transition-all"
-              >
-                {item.label}
-              </button>
-            ))}
+          <div className="hidden md:flex items-center space-x-2">
+            {navItems.map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => scrollTo(item.id)}
+                  className={`
+                    relative px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.4em] font-medium
+                    transition-all duration-300
+                    ${isActive
+                      ? 'text-black bg-black/8 shadow-sm'
+                      : 'text-black/50 hover:text-black hover:bg-black/5'
+                    }
+                  `}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* RIGHT — Inquire + Hamburger */}
@@ -121,20 +143,25 @@ const Navbar = () => {
         <div className="absolute top-0 left-0 w-full h-[1px] bg-black/10" />
 
         <nav className="flex flex-col items-center gap-10 w-full px-8">
-          {navItems.map((item, i) => (
-            <button
-              key={item.id}
-              onClick={() => scrollTo(item.id)}
-              className="text-[12px] uppercase tracking-[0.5em] font-medium text-black/40 hover:text-black transition-all duration-300 w-full text-center py-2 border-b border-black/5"
-              style={{
-                transitionDelay: menuOpen ? `${i * 60}ms` : '0ms',
-                transform: menuOpen ? 'translateY(0)' : 'translateY(12px)',
-                opacity: menuOpen ? 1 : 0,
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
+          {navItems.map((item, i) => {
+            const isActive = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => scrollTo(item.id)}
+                className={`text-[12px] uppercase tracking-[0.5em] font-medium transition-all duration-300 w-full text-center py-2 border-b border-black/5 ${
+                  isActive ? 'text-black' : 'text-black/40 hover:text-black'
+                }`}
+                style={{
+                  transitionDelay: menuOpen ? `${i * 60}ms` : '0ms',
+                  transform: menuOpen ? 'translateY(0)' : 'translateY(12px)',
+                  opacity: menuOpen ? 1 : 0,
+                }}
+              >
+                {item.label}
+              </button>
+            );
+          })}
 
           <button
             onClick={() => scrollTo('contact')}
