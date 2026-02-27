@@ -23,7 +23,7 @@ const About = () => {
           <div className="flex justify-center lg:justify-start">
             <div className="max-w-xl space-y-12">
 
-              <h2 className="text-5xl md:text-8xl font-serif leading-none">
+              <h2 data-scroll-anchor className="text-5xl md:text-8xl font-serif leading-none">
                 Our Philosophy:
               </h2>
 
