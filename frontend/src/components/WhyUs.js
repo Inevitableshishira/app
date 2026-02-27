@@ -10,7 +10,7 @@ const WhyUs = () => {
 
         {/* Section Title */}
         <div className="mb-24">
-          <h2 className="text-5xl md:text-8xl font-serif leading-none">
+          <h2 data-scroll-anchor className="text-5xl md:text-8xl font-serif leading-none">
             Our <br /> Commitment
           </h2>
         </div>
