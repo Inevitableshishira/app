@@ -2,7 +2,7 @@ import React from 'react';
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center bg-white overflow-hidden border-b border-black/5 pt-28">
+    <section className="relative min-h-screen flex items-center bg-white overflow-hidden border-b border-black/5 pt-28 scroll-mt-24 md:scroll-mt-32 lg:scroll-mt-40">
 
       {/* RIGHT SIDE IMAGE */}
       <div className="absolute right-0 top-0 w-full lg:w-1/2 h-full z-0 overflow-hidden">
