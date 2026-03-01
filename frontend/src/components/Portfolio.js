@@ -14,14 +14,20 @@ const Lightbox = ({ project, onClose }) => {
   const [visible, setVisible] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
+  const [imgLoaded, setImgLoaded] = useState({});
   const touchStartX = useRef(null);
   const trackRef = useRef(null);
+  const isMobile = window.innerWidth < 768;
 
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
     document.body.style.overflow = "hidden";
-    // Preload all images immediately on open
-    allImages.forEach(src => { const img = new Image(); img.src = src; });
+    // Preload all images
+    allImages.forEach((src, i) => {
+      const img = new Image();
+      img.onload = () => setImgLoaded(prev => ({ ...prev, [i]: true }));
+      img.src = src;
+    });
     return () => { document.body.style.overflow = ""; };
   }, []);
 
@@ -42,6 +48,7 @@ const Lightbox = ({ project, onClose }) => {
 
   const goTo = (idx) => { setDragOffset(0); setActive(idx); };
 
+  // Touch/drag handlers (used for both mobile swipe and desktop drag)
   const onTouchStart = (e) => {
     touchStartX.current = e.touches ? e.touches[0].clientX : e.clientX;
     setDragging(true);
@@ -62,123 +69,288 @@ const Lightbox = ({ project, onClose }) => {
   const trackW = trackRef.current?.offsetWidth || window.innerWidth;
   const translateX = -active * 100 + (dragOffset / trackW) * 100;
 
-  return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 9999,
-      background: "#000",
-      opacity: visible ? 1 : 0,
-      transition: "opacity 0.28s ease",
-      userSelect: "none", touchAction: "pan-y",
-    }}>
-      {/* TOP BAR */}
+  /* ════════════════════════════════════════
+     MOBILE — full screen swipe viewer
+  ════════════════════════════════════════ */
+  if (isMobile) {
+    return (
       <div style={{
-        position: "absolute", top: 0, left: 0, right: 0, zIndex: 10,
-        padding: "16px 20px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: "linear-gradient(to bottom, rgba(0,0,0,0.7), transparent)",
+        position: "fixed", inset: 0, zIndex: 9999,
+        background: "#000",
+        opacity: visible ? 1 : 0,
+        transition: "opacity 0.28s ease",
+        userSelect: "none", touchAction: "pan-y",
       }}>
-        <button onClick={close} style={{
-          display: "flex", alignItems: "center", gap: 8,
-          background: "none", border: "none", color: "#fff",
-          cursor: "pointer", fontSize: 12, letterSpacing: "0.2em",
-          textTransform: "uppercase", fontFamily: "Inter, sans-serif", opacity: 0.85,
+        {/* TOP BAR */}
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, zIndex: 10,
+          padding: "16px 20px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.75), transparent)",
         }}>
-          <span style={{ fontSize: 18 }}>←</span> Back
-        </button>
+          <button onClick={close} style={{
+            display: "flex", alignItems: "center", gap: 8,
+            background: "none", border: "none", color: "#fff",
+            cursor: "pointer", fontSize: 12, letterSpacing: "0.2em",
+            textTransform: "uppercase", fontFamily: "Inter, sans-serif",
+          }}>
+            <span style={{ fontSize: 18 }}>←</span> Back
+          </button>
+          {allImages.length > 1 && (
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", fontFamily: "Inter, sans-serif", letterSpacing: "0.2em" }}>
+              {active + 1} / {allImages.length}
+            </span>
+          )}
+        </div>
+
+        {/* SWIPE TRACK */}
+        <div ref={trackRef}
+          onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
+          style={{ position: "absolute", inset: 0, overflow: "hidden", cursor: "grab" }}
+        >
+          <div style={{
+            display: "flex", width: `${allImages.length * 100}%`, height: "100%",
+            transform: `translateX(${translateX / allImages.length}%)`,
+            transition: dragging ? "none" : "transform 0.32s cubic-bezier(0.4,0,0.2,1)",
+            willChange: "transform",
+          }}>
+            {allImages.map((img, i) => (
+              <div key={i} style={{
+                width: `${100 / allImages.length}%`, height: "100%", flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <img src={img} alt={`${project.title} ${i + 1}`} draggable={false}
+                  style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* DOTS */}
         {allImages.length > 1 && (
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", fontFamily: "Inter, sans-serif", letterSpacing: "0.2em" }}>
-            {active + 1} / {allImages.length}
-          </span>
+          <div style={{
+            position: "absolute", bottom: 185, left: "50%", transform: "translateX(-50%)",
+            display: "flex", gap: 6, zIndex: 10,
+          }}>
+            {allImages.map((_, i) => (
+              <button key={i} onClick={() => goTo(i)} style={{
+                width: i === active ? 22 : 6, height: 6, borderRadius: 3,
+                border: "none", padding: 0, cursor: "pointer",
+                background: i === active ? "#fff" : "rgba(255,255,255,0.35)",
+                transition: "all 0.25s ease",
+              }} />
+            ))}
+          </div>
         )}
-      </div>
 
-      {/* SWIPE TRACK */}
-      <div
-        ref={trackRef}
-        onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
-        onMouseDown={onTouchStart} onMouseMove={(e) => dragging && onTouchMove(e)}
-        onMouseUp={onTouchEnd} onMouseLeave={onTouchEnd}
-        style={{ position: "absolute", inset: 0, overflow: "hidden", cursor: dragging ? "grabbing" : "grab" }}
-      >
+        {/* BOTTOM INFO */}
         <div style={{
-          display: "flex",
-          width: `${allImages.length * 100}%`,
-          height: "100%",
-          transform: `translateX(${translateX / allImages.length}%)`,
-          transition: dragging ? "none" : "transform 0.32s cubic-bezier(0.4,0,0.2,1)",
-          willChange: "transform",
+          position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 10,
+          background: "linear-gradient(to top, rgba(0,0,0,0.92) 55%, transparent)",
+          padding: "48px 24px 32px",
         }}>
-          {allImages.map((img, i) => (
-            <div key={i} style={{
-              width: `${100 / allImages.length}%`, height: "100%",
-              flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <img src={img} alt={`${project.title} ${i + 1}`} draggable={false}
-                style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }} />
-            </div>
-          ))}
+          <p style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.4em", color: "rgba(255,255,255,0.4)", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>
+            {project.location} — {project.year}
+          </p>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: 26, color: "#fff", lineHeight: 1.2, marginBottom: 10 }}>
+            {project.title}
+          </h2>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, fontFamily: "Inter, sans-serif", fontWeight: 300, marginBottom: 20, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+            {project.description}
+          </p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <span style={{ fontSize: 8, border: "1px solid rgba(255,255,255,0.2)", padding: "5px 12px", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.45)", fontFamily: "Inter, sans-serif" }}>
+              {project.category}
+            </span>
+            <a href="#contact" onClick={close} style={{ padding: "12px 28px", background: "#fff", color: "#111", fontSize: 9, textTransform: "uppercase", letterSpacing: "0.3em", textDecoration: "none", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+              Inquire Now
+            </a>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* DOT INDICATORS */}
-      {allImages.length > 1 && (
-        <div style={{
-          position: "absolute", bottom: 180, left: "50%", transform: "translateX(-50%)",
-          display: "flex", gap: 6, zIndex: 10,
-        }}>
-          {allImages.map((_, i) => (
-            <button key={i} onClick={() => goTo(i)} style={{
-              width: i === active ? 22 : 6, height: 6, borderRadius: 3,
-              border: "none", padding: 0, cursor: "pointer",
-              background: i === active ? "#fff" : "rgba(255,255,255,0.35)",
-              transition: "all 0.25s ease",
-            }} />
-          ))}
-        </div>
-      )}
+  /* ════════════════════════════════════════
+     DESKTOP — centred popup modal
+  ════════════════════════════════════════ */
+  return (
+    <div
+      onClick={(e) => e.target === e.currentTarget && close()}
+      style={{
+        position: "fixed", inset: 0, zIndex: 9999,
+        background: "rgba(0,0,0,0.75)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "32px",
+        opacity: visible ? 1 : 0,
+        transition: "opacity 0.28s ease",
+      }}
+    >
+      {/* CLOSE */}
+      <button onClick={close} style={{
+        position: "absolute", top: 24, right: 28,
+        background: "none", border: "none", color: "rgba(255,255,255,0.6)",
+        fontSize: 26, cursor: "pointer", lineHeight: 1, zIndex: 10,
+        transition: "color 0.2s",
+      }}
+        onMouseEnter={e => e.currentTarget.style.color = "#fff"}
+        onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.6)"}
+      >✕</button>
 
-      {/* ARROWS */}
-      {allImages.length > 1 && (
-        <>
-          <button onClick={() => goTo((active - 1 + allImages.length) % allImages.length)} style={{
-            position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", zIndex: 10,
-            background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
-            color: "#fff", width: 44, height: 44, borderRadius: "50%",
-            cursor: "pointer", fontSize: 22, display: "flex", alignItems: "center", justifyContent: "center",
-            opacity: active === 0 ? 0.2 : 0.8, transition: "opacity 0.2s",
-          }}>‹</button>
-          <button onClick={() => goTo((active + 1) % allImages.length)} style={{
-            position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", zIndex: 10,
-            background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
-            color: "#fff", width: 44, height: 44, borderRadius: "50%",
-            cursor: "pointer", fontSize: 22, display: "flex", alignItems: "center", justifyContent: "center",
-            opacity: active === allImages.length - 1 ? 0.2 : 0.8, transition: "opacity 0.2s",
-          }}>›</button>
-        </>
-      )}
-
-      {/* BOTTOM INFO */}
+      {/* MODAL BOX */}
       <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 10,
-        background: "linear-gradient(to top, rgba(0,0,0,0.9) 55%, transparent)",
-        padding: "48px 28px 32px",
+        display: "flex",
+        width: "100%", maxWidth: 1080,
+        maxHeight: "88vh",
+        background: "#fff",
+        overflow: "hidden",
+        transform: visible ? "translateY(0) scale(1)" : "translateY(20px) scale(0.97)",
+        transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
+        boxShadow: "0 32px 80px rgba(0,0,0,0.4)",
       }}>
-        <p style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.4em", color: "rgba(255,255,255,0.4)", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>
-          {project.location} — {project.year}
-        </p>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "clamp(22px, 4vw, 30px)", color: "#fff", lineHeight: 1.2, marginBottom: 10 }}>
-          {project.title}
-        </h2>
-        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, fontFamily: "Inter, sans-serif", fontWeight: 300, marginBottom: 20, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-          {project.description}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-          <span style={{ fontSize: 8, border: "1px solid rgba(255,255,255,0.2)", padding: "5px 12px", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.45)", fontFamily: "Inter, sans-serif" }}>
-            {project.category}
-          </span>
-          <a href="#contact" onClick={close} style={{ padding: "12px 28px", background: "#fff", color: "#111", fontSize: 9, textTransform: "uppercase", letterSpacing: "0.3em", textDecoration: "none", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-            Inquire Now
-          </a>
+
+        {/* LEFT — image area with swipe */}
+        <div style={{ flex: 1, position: "relative", background: "#111", minWidth: 0, overflow: "hidden" }}>
+          {/* arrows */}
+          {allImages.length > 1 && (
+            <>
+              <button onClick={() => goTo((active - 1 + allImages.length) % allImages.length)} style={{
+                position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", zIndex: 5,
+                background: "rgba(0,0,0,0.45)", border: "1px solid rgba(255,255,255,0.15)",
+                color: "#fff", width: 40, height: 40, borderRadius: "50%",
+                cursor: "pointer", fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center",
+                opacity: active === 0 ? 0.25 : 1, transition: "opacity 0.2s, background 0.2s",
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(0,0,0,0.7)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(0,0,0,0.45)"}
+              >‹</button>
+              <button onClick={() => goTo((active + 1) % allImages.length)} style={{
+                position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", zIndex: 5,
+                background: "rgba(0,0,0,0.45)", border: "1px solid rgba(255,255,255,0.15)",
+                color: "#fff", width: 40, height: 40, borderRadius: "50%",
+                cursor: "pointer", fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center",
+                opacity: active === allImages.length - 1 ? 0.25 : 1, transition: "opacity 0.2s, background 0.2s",
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(0,0,0,0.7)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(0,0,0,0.45)"}
+              >›</button>
+            </>
+          )}
+
+          {/* dot indicators */}
+          {allImages.length > 1 && (
+            <div style={{
+              position: "absolute", bottom: 14, left: "50%", transform: "translateX(-50%)",
+              display: "flex", gap: 6, zIndex: 5,
+            }}>
+              {allImages.map((_, i) => (
+                <button key={i} onClick={() => goTo(i)} style={{
+                  width: i === active ? 20 : 6, height: 6, borderRadius: 3,
+                  border: "none", padding: 0, cursor: "pointer",
+                  background: i === active ? "#fff" : "rgba(255,255,255,0.35)",
+                  transition: "all 0.25s ease",
+                }} />
+              ))}
+            </div>
+          )}
+
+          {/* draggable image strip */}
+          <div ref={trackRef}
+            onMouseDown={onTouchStart}
+            onMouseMove={(e) => dragging && onTouchMove(e)}
+            onMouseUp={onTouchEnd} onMouseLeave={onTouchEnd}
+            onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
+            style={{ width: "100%", height: "100%", overflow: "hidden", cursor: dragging ? "grabbing" : "grab" }}
+          >
+            <div style={{
+              display: "flex", width: `${allImages.length * 100}%`, height: "100%",
+              transform: `translateX(${translateX / allImages.length}%)`,
+              transition: dragging ? "none" : "transform 0.32s cubic-bezier(0.4,0,0.2,1)",
+              willChange: "transform",
+            }}>
+              {allImages.map((img, i) => (
+                <div key={i} style={{ width: `${100 / allImages.length}%`, height: "100%", flexShrink: 0 }}>
+                  <img src={img} alt={`${project.title} ${i + 1}`} draggable={false}
+                    style={{
+                      width: "100%", height: "100%", objectFit: "cover",
+                      opacity: imgLoaded[i] ? 1 : 0,
+                      transition: "opacity 0.3s ease",
+                      pointerEvents: "none",
+                    }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT — detail panel */}
+        <div style={{
+          width: 320, flexShrink: 0,
+          padding: "44px 36px",
+          display: "flex", flexDirection: "column", justifyContent: "space-between",
+          overflowY: "auto",
+          borderLeft: "1px solid rgba(0,0,0,0.06)",
+        }}>
+          <div>
+            <p style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.35em", color: "rgba(0,0,0,0.3)", marginBottom: 14 }}>
+              {project.location} — {project.year}
+            </p>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: 30, lineHeight: 1.15, marginBottom: 20, color: "#111" }}>
+              {project.title}
+            </h2>
+            <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)", marginBottom: 20 }} />
+            <p style={{ fontSize: 14, color: "rgba(0,0,0,0.6)", lineHeight: 1.85, fontWeight: 300, marginBottom: 28 }}>
+              {project.description}
+            </p>
+            <span style={{ fontSize: 8, border: "1px solid rgba(0,0,0,0.12)", padding: "5px 12px", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.4)", display: "inline-block" }}>
+              {project.category}
+            </span>
+
+            {/* thumbnail strip */}
+            {allImages.length > 1 && (
+              <div style={{ marginTop: 28 }}>
+                <p style={{ fontSize: 8, textTransform: "uppercase", letterSpacing: "0.3em", color: "rgba(0,0,0,0.25)", marginBottom: 10 }}>
+                  {allImages.length} Images
+                </p>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {allImages.map((img, i) => (
+                    <button key={i} onClick={() => goTo(i)} style={{
+                      width: 52, height: 38, padding: 0, border: "none",
+                      cursor: "pointer", overflow: "hidden", flexShrink: 0,
+                      outline: i === active ? "2px solid #111" : "2px solid transparent",
+                      outlineOffset: 2, transition: "outline 0.2s",
+                    }}>
+                      <img src={img} alt="" draggable={false} style={{
+                        width: "100%", height: "100%", objectFit: "cover",
+                        filter: i === active ? "none" : "grayscale(60%)",
+                        transition: "filter 0.25s",
+                        pointerEvents: "none",
+                      }} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* CTA */}
+          <div style={{ marginTop: 28, borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: 24 }}>
+            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.38)", marginBottom: 14, letterSpacing: "0.05em" }}>
+              Interested in a similar project?
+            </p>
+            <a href="#contact" onClick={close} style={{
+              display: "block", textAlign: "center", padding: "13px 24px",
+              background: "#111", color: "#fff", fontSize: 9,
+              textTransform: "uppercase", letterSpacing: "0.3em",
+              textDecoration: "none", fontFamily: "Inter, sans-serif", fontWeight: 600,
+              transition: "background 0.2s",
+            }}
+              onMouseEnter={e => e.currentTarget.style.background = "#333"}
+              onMouseLeave={e => e.currentTarget.style.background = "#111"}
+            >
+              Inquire Now
+            </a>
+          </div>
         </div>
       </div>
     </div>
