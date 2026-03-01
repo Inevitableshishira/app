@@ -5,6 +5,18 @@ import Logo from '../components/Logo';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Convert Google Drive share links to direct image URLs
+const toDirectUrl = (url) => {
+  if (!url) return url;
+  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if (fileMatch) return `https://lh3.googleusercontent.com/d/${fileMatch[1]}`;
+  const openMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if (openMatch) return `https://lh3.googleusercontent.com/d/${openMatch[1]}`;
+  const ucMatch = url.match(/[?&]id=([^&]+)/);
+  if (ucMatch && url.includes('drive.google.com')) return `https://lh3.googleusercontent.com/d/${ucMatch[1]}`;
+  return url;
+};
+
 const EMPTY_FORM = {
   title: '',
   category: 'Residential',
@@ -140,7 +152,7 @@ const AdminPage = () => {
   const addExtraImage = () => {
     const url = extraImageInput.trim();
     if (!url) return;
-    setProjectForm(f => ({ ...f, images: [...(f.images || []), url] }));
+    setProjectForm(f => ({ ...f, images: [...(f.images || []), toDirectUrl(url)] }));
     setExtraImageInput('');
   };
 
@@ -275,7 +287,7 @@ const AdminPage = () => {
                 <div>
                   <label className="block text-[9px] uppercase tracking-widest text-black/40 mb-2">Cover Image URL <span className="text-black/25">(shown on portfolio grid)</span></label>
                   <input type="url" value={projectForm.image} required
-                    onChange={e => setProjectForm({ ...projectForm, image: e.target.value })}
+                    onChange={e => setProjectForm({ ...projectForm, image: toDirectUrl(e.target.value) })}
                     placeholder="https://images.unsplash.com/..."
                     className="w-full border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors bg-transparent"
                     data-testid="project-image-input" />
