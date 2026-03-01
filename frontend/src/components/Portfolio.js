@@ -7,9 +7,24 @@ const API = `${BACKEND_URL}/api`;
 // ── Cache so projects never re-fetch after first load ──────────
 let _cache = null;
 
+// ── Convert any Google Drive share link to a direct image URL ──
+const toDirectUrl = (url) => {
+  if (!url) return url;
+  // Format: https://drive.google.com/file/d/FILE_ID/view?...
+  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if (fileMatch) return `https://lh3.googleusercontent.com/d/${fileMatch[1]}`;
+  // Format: https://drive.google.com/open?id=FILE_ID
+  const openMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if (openMatch) return `https://lh3.googleusercontent.com/d/${openMatch[1]}`;
+  // Format: https://drive.google.com/uc?id=FILE_ID or uc?export=view&id=...
+  const ucMatch = url.match(/[?&]id=([^&]+)/);
+  if (ucMatch && url.includes('drive.google.com')) return `https://lh3.googleusercontent.com/d/${ucMatch[1]}`;
+  return url; // not a drive link, return as-is
+};
+
 /* ─── LIGHTBOX ─────────────────────────────────────────────── */
 const Lightbox = ({ project, onClose }) => {
-  const allImages = [project.image, ...(project.images || [])].filter(Boolean);
+  const allImages = [project.image, ...(project.images || [])].filter(Boolean).map(toDirectUrl);
   const [active, setActive] = useState(0);
   const [visible, setVisible] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -360,7 +375,7 @@ const Lightbox = ({ project, onClose }) => {
 /* ─── SKELETON CARD ─────────────────────────────────────────── */
 const SkeletonCard = () => (
   <div style={{ animation: "pulse 1.4s ease-in-out infinite" }}>
-    <div style={{ width: "100%", paddingBottom: "62.5%", background: "#f0f0f0", marginBottom: 24 }} />
+    <div style={{ width: "100%", height: 220, background: "#f0f0f0", marginBottom: 24 }} />
     <div style={{ height: 10, background: "#f0f0f0", width: "30%", marginBottom: 12 }} />
     <div style={{ height: 20, background: "#f0f0f0", width: "70%", marginBottom: 10 }} />
     <div style={{ height: 14, background: "#f0f0f0", width: "90%" }} />
@@ -432,17 +447,17 @@ const Portfolio = () => {
                     onMouseLeave={() => setHoveredId(null)}
                   >
                     {/* IMAGE */}
-                    <div className="relative overflow-hidden aspect-[16/10] bg-stone-100 border border-black/5 mb-8">
+                    <div className="relative overflow-hidden bg-stone-100 border border-black/5 mb-8" style={{lineHeight:0}}>
                       <img
-                        src={p.image}
+                        src={toDirectUrl(p.image)}
                         alt={p.title}
                         loading="lazy"
                         decoding="async"
                         style={{
-                          width: "100%", height: "100%", objectFit: "cover",
-                          transform: hoveredId === p.id ? "scale(1.05)" : "scale(1)",
+                          width: "100%", height: "auto", display: "block",
+                          transform: hoveredId === p.id ? "scale(1.03)" : "scale(1)",
                           filter: hoveredId === p.id ? "grayscale(0%)" : "grayscale(100%)",
-                          transition: "transform 0.6s cubic-bezier(0.4,0,0.2,1), filter 0.45s ease",
+                          transition: "transform 0.5s cubic-bezier(0.4,0,0.2,1), filter 0.4s ease",
                         }}
                       />
                       {/* hover overlay */}
