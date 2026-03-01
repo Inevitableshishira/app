@@ -8,10 +8,12 @@ const API = `${BACKEND_URL}/api`;
 const Lightbox = ({ project, onClose }) => {
   const allImages = [project.image, ...(project.images || [])].filter(Boolean);
   const [active, setActive] = useState(0);
-  const [imgLoaded, setImgLoaded] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const touchStartX = React.useRef(null);
+  const trackRef = React.useRef(null);
 
-  // mount animation
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
     document.body.style.overflow = "hidden";
@@ -20,245 +22,239 @@ const Lightbox = ({ project, onClose }) => {
 
   const close = useCallback(() => {
     setVisible(false);
-    setTimeout(onClose, 380);
+    setTimeout(onClose, 350);
   }, [onClose]);
 
-  // keyboard nav
   useEffect(() => {
     const handle = (e) => {
       if (e.key === "Escape") close();
-      if (e.key === "ArrowRight") setActive(a => (a + 1) % allImages.length);
-      if (e.key === "ArrowLeft") setActive(a => (a - 1 + allImages.length) % allImages.length);
+      if (e.key === "ArrowRight") goTo((active + 1) % allImages.length);
+      if (e.key === "ArrowLeft") goTo((active - 1 + allImages.length) % allImages.length);
     };
     window.addEventListener("keydown", handle);
     return () => window.removeEventListener("keydown", handle);
-  }, [close, allImages.length]);
+  }, [close, active, allImages.length]);
 
-  const changeImage = (idx) => {
-    setImgLoaded(false);
+  const goTo = (idx) => {
+    setDragOffset(0);
     setActive(idx);
   };
 
+  // Touch / mouse drag
+  const onTouchStart = (e) => {
+    touchStartX.current = e.touches ? e.touches[0].clientX : e.clientX;
+    setDragging(true);
+  };
+  const onTouchMove = (e) => {
+    if (!dragging || touchStartX.current === null) return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    setDragOffset(x - touchStartX.current);
+  };
+  const onTouchEnd = () => {
+    if (!dragging) return;
+    setDragging(false);
+    if (dragOffset < -60 && active < allImages.length - 1) goTo(active + 1);
+    else if (dragOffset > 60 && active > 0) goTo(active - 1);
+    else setDragOffset(0);
+  };
+
+  const translateX = -active * 100 + (dragOffset / (trackRef.current?.offsetWidth || window.innerWidth)) * 100;
+
   return (
     <div
-      onClick={(e) => e.target === e.currentTarget && close()}
       style={{
         position: "fixed", inset: 0, zIndex: 9999,
-        background: "rgba(0,0,0,0.92)",
-        display: "flex", alignItems: "center", justifyContent: "center",
+        background: "#000",
         opacity: visible ? 1 : 0,
-        transition: "opacity 0.38s cubic-bezier(0.4,0,0.2,1)",
-        padding: "24px",
+        transition: "opacity 0.35s ease",
+        userSelect: "none",
+        touchAction: "pan-y",
       }}
     >
-      {/* CLOSE */}
-      <button
-        onClick={close}
-        style={{
-          position: "absolute", top: 24, right: 28,
-          background: "none", border: "none", cursor: "pointer",
-          color: "rgba(255,255,255,0.5)", fontSize: 28, lineHeight: 1,
-          transition: "color 0.2s", zIndex: 10,
-        }}
-        onMouseEnter={e => e.currentTarget.style.color = "#fff"}
-        onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
-      >
-        ✕
-      </button>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: allImages.length > 1 ? "1fr 360px" : "1fr",
-          gap: 0,
-          width: "100%",
-          maxWidth: 1100,
-          maxHeight: "88vh",
-          transform: visible ? "translateY(0) scale(1)" : "translateY(24px) scale(0.97)",
-          transition: "transform 0.38s cubic-bezier(0.4,0,0.2,1)",
-          overflow: "hidden",
-        }}
-      >
-        {/* MAIN IMAGE */}
-        <div style={{ position: "relative", background: "#111", overflow: "hidden" }}>
-          {/* prev / next arrows */}
-          {allImages.length > 1 && (
-            <>
-              <button
-                onClick={() => changeImage((active - 1 + allImages.length) % allImages.length)}
-                style={{
-                  position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)",
-                  zIndex: 5, background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)",
-                  color: "#fff", width: 40, height: 40, cursor: "pointer", fontSize: 18,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "background 0.2s",
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(0,0,0,0.8)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(0,0,0,0.5)"}
-              >‹</button>
-              <button
-                onClick={() => changeImage((active + 1) % allImages.length)}
-                style={{
-                  position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)",
-                  zIndex: 5, background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)",
-                  color: "#fff", width: 40, height: 40, cursor: "pointer", fontSize: 18,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "background 0.2s",
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(0,0,0,0.8)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(0,0,0,0.5)"}
-              >›</button>
-            </>
-          )}
-
-          {/* image counter */}
-          {allImages.length > 1 && (
-            <div style={{
-              position: "absolute", bottom: 16, left: "50%", transform: "translateX(-50%)",
-              display: "flex", gap: 6, zIndex: 5,
-            }}>
-              {allImages.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => changeImage(i)}
-                  style={{
-                    width: i === active ? 20 : 6, height: 6,
-                    borderRadius: 3, border: "none",
-                    background: i === active ? "#fff" : "rgba(255,255,255,0.35)",
-                    cursor: "pointer", padding: 0,
-                    transition: "all 0.3s ease",
-                  }}
-                />
-              ))}
-            </div>
-          )}
-
-          <img
-            key={active}
-            src={allImages[active]}
-            alt={project.title}
-            onLoad={() => setImgLoaded(true)}
-            style={{
-              width: "100%", height: "100%",
-              maxHeight: "88vh",
-              objectFit: "cover",
-              display: "block",
-              opacity: imgLoaded ? 1 : 0,
-              transition: "opacity 0.4s ease",
-              filter: "grayscale(20%)",
-            }}
-          />
-        </div>
-
-        {/* DETAIL PANEL */}
-        <div style={{
-          background: "#fff",
-          padding: "48px 36px",
-          display: "flex", flexDirection: "column",
-          justifyContent: "space-between",
-          overflowY: "auto",
+      {/* ── TOP BAR ── */}
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0,
+        zIndex: 10, padding: "16px 20px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: "linear-gradient(to bottom, rgba(0,0,0,0.7), transparent)",
+      }}>
+        {/* Back */}
+        <button onClick={close} style={{
+          display: "flex", alignItems: "center", gap: 8,
+          background: "none", border: "none", color: "#fff",
+          cursor: "pointer", fontSize: 13, letterSpacing: "0.15em",
+          textTransform: "uppercase", fontFamily: "Inter, sans-serif",
+          opacity: 0.85,
         }}>
-          <div>
-            {/* meta */}
-            <p style={{
-              fontSize: 9, textTransform: "uppercase", letterSpacing: "0.35em",
-              color: "rgba(0,0,0,0.3)", marginBottom: 16,
+          <span style={{ fontSize: 20, lineHeight: 1 }}>←</span> Back
+        </button>
+
+        {/* Counter */}
+        {allImages.length > 1 && (
+          <span style={{
+            fontSize: 11, color: "rgba(255,255,255,0.6)",
+            fontFamily: "Inter, sans-serif", letterSpacing: "0.2em",
+          }}>
+            {active + 1} / {allImages.length}
+          </span>
+        )}
+      </div>
+
+      {/* ── SWIPE TRACK ── */}
+      <div
+        ref={trackRef}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onTouchStart}
+        onMouseMove={(e) => dragging && onTouchMove(e)}
+        onMouseUp={onTouchEnd}
+        onMouseLeave={onTouchEnd}
+        style={{
+          position: "absolute", inset: 0,
+          overflow: "hidden",
+          cursor: dragging ? "grabbing" : "grab",
+        }}
+      >
+        <div style={{
+          display: "flex",
+          width: `${allImages.length * 100}%`,
+          height: "100%",
+          transform: `translateX(${translateX / allImages.length}%)`,
+          transition: dragging ? "none" : "transform 0.38s cubic-bezier(0.4,0,0.2,1)",
+          willChange: "transform",
+        }}>
+          {allImages.map((img, i) => (
+            <div key={i} style={{
+              width: `${100 / allImages.length}%`,
+              height: "100%",
+              flexShrink: 0,
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}>
-              {project.location} — {project.year}
-            </p>
-
-            {/* title */}
-            <h2 style={{
-              fontFamily: "'Playfair Display', serif", fontStyle: "italic",
-              fontSize: "clamp(24px, 3vw, 36px)", lineHeight: 1.15,
-              marginBottom: 24, color: "#111",
-            }}>
-              {project.title}
-            </h2>
-
-            {/* divider */}
-            <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", marginBottom: 24 }} />
-
-            {/* description */}
-            <p style={{
-              fontSize: 14, color: "rgba(0,0,0,0.6)",
-              lineHeight: 1.8, fontWeight: 300, marginBottom: 32,
-            }}>
-              {project.description}
-            </p>
-
-            {/* category badge */}
-            <span style={{
-              fontSize: 8, border: "1px solid rgba(0,0,0,0.12)",
-              padding: "5px 12px", textTransform: "uppercase",
-              letterSpacing: "0.2em", color: "rgba(0,0,0,0.4)",
-            }}>
-              {project.category}
-            </span>
-          </div>
-
-          {/* thumbnail strip */}
-          {allImages.length > 1 && (
-            <div style={{ marginTop: 32 }}>
-              <p style={{
-                fontSize: 8, textTransform: "uppercase", letterSpacing: "0.3em",
-                color: "rgba(0,0,0,0.25)", marginBottom: 12,
-              }}>
-                {allImages.length} Images
-              </p>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {allImages.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => changeImage(i)}
-                    style={{
-                      width: 56, height: 40, padding: 0, border: "none",
-                      cursor: "pointer", overflow: "hidden",
-                      outline: i === active ? "2px solid #111" : "2px solid transparent",
-                      outlineOffset: 2,
-                      transition: "outline 0.2s",
-                    }}
-                  >
-                    <img
-                      src={img}
-                      alt=""
-                      style={{
-                        width: "100%", height: "100%", objectFit: "cover",
-                        filter: i === active ? "none" : "grayscale(60%)",
-                        transition: "filter 0.3s",
-                      }}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* CTA */}
-          <div style={{ marginTop: 32 }}>
-            <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", paddingTop: 24 }}>
-              <p style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", marginBottom: 14, letterSpacing: "0.05em" }}>
-                Interested in a similar project?
-              </p>
-              <a
-                href="#contact"
-                onClick={close}
+              <img
+                src={img}
+                alt={`${project.title} ${i + 1}`}
+                draggable={false}
                 style={{
-                  display: "inline-block",
-                  padding: "12px 24px",
-                  background: "#111", color: "#fff",
-                  fontSize: 10, textTransform: "uppercase",
-                  letterSpacing: "0.3em", textDecoration: "none",
-                  fontFamily: "Inter, sans-serif", fontWeight: 600,
-                  transition: "background 0.2s",
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  objectPosition: "center",
+                  pointerEvents: "none",
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = "#333"}
-                onMouseLeave={e => e.currentTarget.style.background = "#111"}
-              >
-                Inquire Now
-              </a>
+              />
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── DOT INDICATORS ── */}
+      {allImages.length > 1 && (
+        <div style={{
+          position: "absolute", bottom: 180, left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex", gap: 6, zIndex: 10,
+        }}>
+          {allImages.map((_, i) => (
+            <button key={i} onClick={() => goTo(i)} style={{
+              width: i === active ? 22 : 6, height: 6,
+              borderRadius: 3, border: "none", padding: 0,
+              cursor: "pointer",
+              background: i === active ? "#fff" : "rgba(255,255,255,0.35)",
+              transition: "all 0.3s ease",
+            }} />
+          ))}
+        </div>
+      )}
+
+      {/* ── PREV / NEXT — desktop arrows ── */}
+      {allImages.length > 1 && (
+        <>
+          <button
+            onClick={() => goTo((active - 1 + allImages.length) % allImages.length)}
+            style={{
+              position: "absolute", left: 20, top: "50%",
+              transform: "translateY(-50%)", zIndex: 10,
+              background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
+              color: "#fff", width: 48, height: 48, borderRadius: "50%",
+              cursor: "pointer", fontSize: 22,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "background 0.2s",
+              opacity: active === 0 ? 0.25 : 1,
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+            onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+          >‹</button>
+          <button
+            onClick={() => goTo((active + 1) % allImages.length)}
+            style={{
+              position: "absolute", right: 20, top: "50%",
+              transform: "translateY(-50%)", zIndex: 10,
+              background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
+              color: "#fff", width: 48, height: 48, borderRadius: "50%",
+              cursor: "pointer", fontSize: 22,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "background 0.2s",
+              opacity: active === allImages.length - 1 ? 0.25 : 1,
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+            onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+          >›</button>
+        </>
+      )}
+
+      {/* ── BOTTOM INFO PANEL ── */}
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        zIndex: 10,
+        background: "linear-gradient(to top, rgba(0,0,0,0.88) 60%, transparent)",
+        padding: "40px 24px 36px",
+      }}>
+        <p style={{
+          fontSize: 9, textTransform: "uppercase",
+          letterSpacing: "0.4em", color: "rgba(255,255,255,0.4)",
+          marginBottom: 8, fontFamily: "Inter, sans-serif",
+        }}>
+          {project.location} — {project.year}
+        </p>
+        <h2 style={{
+          fontFamily: "'Playfair Display', serif", fontStyle: "italic",
+          fontSize: "clamp(22px, 5vw, 32px)", color: "#fff",
+          lineHeight: 1.2, marginBottom: 10,
+        }}>
+          {project.title}
+        </h2>
+        <p style={{
+          fontSize: 13, color: "rgba(255,255,255,0.55)",
+          lineHeight: 1.7, fontFamily: "Inter, sans-serif",
+          fontWeight: 300, marginBottom: 20,
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+        }}>
+          {project.description}
+        </p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <span style={{
+            fontSize: 8, border: "1px solid rgba(255,255,255,0.25)",
+            padding: "5px 12px", textTransform: "uppercase",
+            letterSpacing: "0.2em", color: "rgba(255,255,255,0.5)",
+            fontFamily: "Inter, sans-serif",
+          }}>
+            {project.category}
+          </span>
+          <a href="#contact" onClick={close} style={{
+            padding: "11px 24px", background: "#fff", color: "#111",
+            fontSize: 9, textTransform: "uppercase", letterSpacing: "0.3em",
+            textDecoration: "none", fontFamily: "Inter, sans-serif", fontWeight: 600,
+            flexShrink: 0,
+          }}>
+            Inquire Now
+          </a>
         </div>
       </div>
     </div>
