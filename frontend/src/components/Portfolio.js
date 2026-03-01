@@ -447,17 +447,18 @@ const Portfolio = () => {
                     onMouseLeave={() => setHoveredId(null)}
                   >
                     {/* IMAGE */}
-                    <div className="relative overflow-hidden bg-stone-100 border border-black/5 mb-8" style={{lineHeight:0}}>
+                    <div className="relative overflow-hidden mb-8" style={{aspectRatio:"4/3", background:"#f4f4f4", border:"1px solid rgba(0,0,0,0.06)"}}>
                       <img
                         src={toDirectUrl(p.image)}
                         alt={p.title}
                         loading="lazy"
                         decoding="async"
                         style={{
-                          width: "100%", height: "auto", display: "block",
-                          transform: hoveredId === p.id ? "scale(1.03)" : "scale(1)",
+                          position: "absolute", inset: 0,
+                          width: "100%", height: "100%", objectFit: "cover",
+                          transform: hoveredId === p.id ? "scale(1.04)" : "scale(1)",
                           filter: hoveredId === p.id ? "grayscale(0%)" : "grayscale(100%)",
-                          transition: "transform 0.5s cubic-bezier(0.4,0,0.2,1), filter 0.4s ease",
+                          transition: "transform 0.55s cubic-bezier(0.4,0,0.2,1), filter 0.4s ease",
                         }}
                       />
                       {/* hover overlay */}
