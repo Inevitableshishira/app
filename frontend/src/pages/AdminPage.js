@@ -5,6 +5,16 @@ import Logo from '../components/Logo';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+const EMPTY_FORM = {
+  title: '',
+  category: 'Residential',
+  image: '',
+  images: [],
+  year: new Date().getFullYear().toString(),
+  location: '',
+  description: ''
+};
+
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
@@ -15,153 +25,94 @@ const AdminPage = () => {
   const [inquiries, setInquiries] = useState([]);
   const [editingProject, setEditingProject] = useState(null);
   const [showProjectForm, setShowProjectForm] = useState(false);
-  const [projectForm, setProjectForm] = useState({
-    title: '',
-    category: 'Residential',
-    image: '',
-    year: new Date().getFullYear().toString(),
-    location: '',
-    description: ''
-  });
+  const [projectForm, setProjectForm] = useState(EMPTY_FORM);
+  const [extraImageInput, setExtraImageInput] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
-    if (token) {
-      setIsAuthenticated(true);
-      fetchData();
-    }
+    if (token) { setIsAuthenticated(true); fetchData(); }
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchData();
-    }
+    if (isAuthenticated) fetchData();
   }, [isAuthenticated, activeTab]);
 
   const fetchData = async () => {
     const token = localStorage.getItem('admin_token');
     if (!token) return;
-
     try {
       if (activeTab === 'projects') {
-        const response = await axios.get(`${API}/projects`);
-        setProjects(response.data);
-      } else if (activeTab === 'inquiries') {
-        const response = await axios.get(`${API}/admin/inquiries`, {
+        const res = await axios.get(`${API}/projects`);
+        setProjects(res.data);
+      } else {
+        const res = await axios.get(`${API}/admin/inquiries`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setInquiries(response.data);
+        setInquiries(res.data);
       }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      if (error.response?.status === 401) {
-        handleLogout();
-      }
+    } catch (err) {
+      if (err.response?.status === 401) handleLogout();
     }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginError('');
-
     try {
-      const response = await axios.post(`${API}/admin/login`, {
-        username,
-        password
-      });
-      localStorage.setItem('admin_token', response.data.access_token);
+      const res = await axios.post(`${API}/admin/login`, { username, password });
+      localStorage.setItem('admin_token', res.data.access_token);
       setIsAuthenticated(true);
-      setUsername('');
-      setPassword('');
-    } catch (error) {
+      setUsername(''); setPassword('');
+    } catch {
       setLoginError('Invalid credentials');
-      console.error('Login error:', error);
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
     setIsAuthenticated(false);
-    setUsername('');
-    setPassword('');
   };
 
-  const handleCreateProject = async (e) => {
+  const handleSaveProject = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('admin_token');
-
     try {
-      await axios.post(`${API}/admin/projects`, projectForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setProjectForm({
-        title: '',
-        category: 'Residential',
-        image: '',
-        year: new Date().getFullYear().toString(),
-        location: '',
-        description: ''
-      });
-      setShowProjectForm(false);
+      if (editingProject) {
+        await axios.put(`${API}/admin/projects/${editingProject.id}`, projectForm, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        await axios.post(`${API}/admin/projects`, projectForm, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+      cancelEdit();
       fetchData();
-    } catch (error) {
-      console.error('Error creating project:', error);
-      alert('Failed to create project');
+    } catch {
+      alert('Failed to save project');
     }
   };
 
-  const handleUpdateProject = async (e) => {
-    e.preventDefault();
+  const handleDeleteProject = async (id) => {
+    if (!window.confirm('Delete this project?')) return;
     const token = localStorage.getItem('admin_token');
-
     try {
-      await axios.put(`${API}/admin/projects/${editingProject.id}`, projectForm, {
+      await axios.delete(`${API}/admin/projects/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setEditingProject(null);
-      setProjectForm({
-        title: '',
-        category: 'Residential',
-        image: '',
-        year: new Date().getFullYear().toString(),
-        location: '',
-        description: ''
-      });
       fetchData();
-    } catch (error) {
-      console.error('Error updating project:', error);
-      alert('Failed to update project');
-    }
+    } catch { alert('Failed to delete'); }
   };
 
-  const handleDeleteProject = async (projectId) => {
-    if (!window.confirm('Are you sure you want to delete this project?')) return;
-
+  const handleDeleteInquiry = async (id) => {
+    if (!window.confirm('Delete this inquiry?')) return;
     const token = localStorage.getItem('admin_token');
     try {
-      await axios.delete(`${API}/admin/projects/${projectId}`, {
+      await axios.delete(`${API}/admin/inquiries/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchData();
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      alert('Failed to delete project');
-    }
-  };
-
-  const handleDeleteInquiry = async (inquiryId) => {
-    if (!window.confirm('Are you sure you want to delete this inquiry?')) return;
-
-    const token = localStorage.getItem('admin_token');
-    try {
-      await axios.delete(`${API}/admin/inquiries/${inquiryId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchData();
-    } catch (error) {
-      console.error('Error deleting inquiry:', error);
-      alert('Failed to delete inquiry');
-    }
+    } catch { alert('Failed to delete'); }
   };
 
   const startEdit = (project) => {
@@ -170,25 +121,34 @@ const AdminPage = () => {
       title: project.title,
       category: project.category,
       image: project.image,
+      images: project.images || [],
       year: project.year,
       location: project.location,
       description: project.description
     });
+    setShowProjectForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const cancelEdit = () => {
     setEditingProject(null);
     setShowProjectForm(false);
-    setProjectForm({
-      title: '',
-      category: 'Residential',
-      image: '',
-      year: new Date().getFullYear().toString(),
-      location: '',
-      description: ''
-    });
+    setProjectForm(EMPTY_FORM);
+    setExtraImageInput('');
   };
 
+  const addExtraImage = () => {
+    const url = extraImageInput.trim();
+    if (!url) return;
+    setProjectForm(f => ({ ...f, images: [...(f.images || []), url] }));
+    setExtraImageInput('');
+  };
+
+  const removeExtraImage = (idx) => {
+    setProjectForm(f => ({ ...f, images: f.images.filter((_, i) => i !== idx) }));
+  };
+
+  /* ── LOGIN ── */
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-8">
@@ -198,52 +158,35 @@ const AdminPage = () => {
             <h1 className="text-3xl font-serif italic mb-2">Admin Portal</h1>
             <p className="text-[10px] uppercase tracking-widest text-black/40">Restricted Access</p>
           </div>
-
           <form onSubmit={handleLogin} className="space-y-8 border border-black/10 p-12" data-testid="admin-login-form">
             <div className="border-b border-black/20 py-4">
-              <input
-                type="text"
-                placeholder="USERNAME"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+              <input type="text" placeholder="USERNAME" value={username}
+                onChange={e => setUsername(e.target.value)}
                 className="w-full bg-transparent outline-none text-[11px] tracking-[0.2em] placeholder:text-black/20"
-                required
-                data-testid="admin-username-input"
-              />
+                required data-testid="admin-username-input" />
             </div>
             <div className="border-b border-black/20 py-4">
-              <input
-                type="password"
-                placeholder="PASSWORD"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+              <input type="password" placeholder="PASSWORD" value={password}
+                onChange={e => setPassword(e.target.value)}
                 className="w-full bg-transparent outline-none text-[11px] tracking-[0.2em] placeholder:text-black/20"
-                required
-                data-testid="admin-password-input"
-              />
+                required data-testid="admin-password-input" />
             </div>
-            {loginError && (
-              <p className="text-red-600 text-[10px] uppercase tracking-widest" data-testid="admin-login-error">{loginError}</p>
-            )}
-            <button
-              type="submit"
+            {loginError && <p className="text-red-600 text-[10px] uppercase tracking-widest">{loginError}</p>}
+            <button type="submit"
               className="w-full py-4 bg-black text-white text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-black/90 transition-all"
-              data-testid="admin-login-button"
-            >
+              data-testid="admin-login-button">
               Access Portal
             </button>
           </form>
-
           <div className="mt-8 text-center">
-            <a href="/" className="text-[10px] uppercase tracking-widest text-black/40 hover:text-black transition-colors">
-              ← Back to Site
-            </a>
+            <a href="/" className="text-[10px] uppercase tracking-widest text-black/40 hover:text-black transition-colors">← Back to Site</a>
           </div>
         </div>
       </div>
     );
   }
 
+  /* ── DASHBOARD ── */
   return (
     <div className="min-h-screen bg-white">
       <nav className="border-b border-black/10 bg-white sticky top-0 z-50">
@@ -252,181 +195,210 @@ const AdminPage = () => {
             <Logo color="black" className="scale-75" />
             <span className="text-[10px] uppercase tracking-widest text-black/40">Admin Dashboard</span>
           </div>
-          <button
-            onClick={handleLogout}
+          <button onClick={handleLogout}
             className="px-6 py-2 border border-black text-[10px] uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all"
-            data-testid="admin-logout-button"
-          >
+            data-testid="admin-logout-button">
             Logout
           </button>
         </div>
       </nav>
 
       <div className="max-w-7xl mx-auto px-8 py-12">
+        {/* TABS */}
         <div className="flex gap-8 mb-12 border-b border-black/10 pb-4">
-          <button
-            onClick={() => setActiveTab('projects')}
-            className={`text-[10px] uppercase tracking-[0.3em] pb-2 relative ${
-              activeTab === 'projects' ? 'text-black' : 'text-black/40 hover:text-black'
-            }`}
-            data-testid="tab-projects"
-          >
-            Projects ({projects.length})
-            {activeTab === 'projects' && <span className="absolute bottom-0 left-0 w-full h-[2px] bg-black"></span>}
-          </button>
-          <button
-            onClick={() => setActiveTab('inquiries')}
-            className={`text-[10px] uppercase tracking-[0.3em] pb-2 relative ${
-              activeTab === 'inquiries' ? 'text-black' : 'text-black/40 hover:text-black'
-            }`}
-            data-testid="tab-inquiries"
-          >
-            Inquiries ({inquiries.length})
-            {activeTab === 'inquiries' && <span className="absolute bottom-0 left-0 w-full h-[2px] bg-black"></span>}
-          </button>
+          {['projects', 'inquiries'].map(tab => (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              className={`text-[10px] uppercase tracking-[0.3em] pb-2 relative ${activeTab === tab ? 'text-black' : 'text-black/40 hover:text-black'}`}
+              data-testid={`tab-${tab}`}>
+              {tab === 'projects' ? `Projects (${projects.length})` : `Inquiries (${inquiries.length})`}
+              {activeTab === tab && <span className="absolute bottom-0 left-0 w-full h-[2px] bg-black" />}
+            </button>
+          ))}
         </div>
 
+        {/* ── PROJECTS TAB ── */}
         {activeTab === 'projects' && (
           <div>
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-serif italic">Manage Projects</h2>
-              {!showProjectForm && !editingProject && (
-                <button
-                  onClick={() => setShowProjectForm(true)}
+              {!showProjectForm && (
+                <button onClick={() => setShowProjectForm(true)}
                   className="px-6 py-3 bg-black text-white text-[10px] uppercase tracking-[0.3em] hover:bg-black/90 transition-all"
-                  data-testid="add-project-button"
-                >
+                  data-testid="add-project-button">
                   + Add Project
                 </button>
               )}
             </div>
 
-            {(showProjectForm || editingProject) && (
-              <form onSubmit={editingProject ? handleUpdateProject : handleCreateProject} className="mb-12 border border-black/10 p-8 space-y-6" data-testid="project-form">
-                <h3 className="text-xl font-serif italic mb-6">{editingProject ? 'Edit Project' : 'New Project'}</h3>
+            {/* FORM */}
+            {showProjectForm && (
+              <form onSubmit={handleSaveProject}
+                className="mb-12 border border-black/10 p-8 space-y-6 bg-stone-50"
+                data-testid="project-form">
+                <h3 className="text-xl font-serif italic">{editingProject ? 'Edit Project' : 'New Project'}</h3>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-[9px] uppercase tracking-widest text-black/40 mb-2">Title</label>
-                    <input
-                      type="text"
-                      value={projectForm.title}
-                      onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })}
-                      className="w-full border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors"
-                      required
-                      data-testid="project-title-input"
-                    />
+                    <input type="text" value={projectForm.title} required
+                      onChange={e => setProjectForm({ ...projectForm, title: e.target.value })}
+                      className="w-full border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors bg-transparent"
+                      data-testid="project-title-input" />
                   </div>
                   <div>
                     <label className="block text-[9px] uppercase tracking-widest text-black/40 mb-2">Category</label>
-                    <select
-                      value={projectForm.category}
-                      onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })}
-                      className="w-full border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors"
-                      data-testid="project-category-select"
-                    >
+                    <select value={projectForm.category}
+                      onChange={e => setProjectForm({ ...projectForm, category: e.target.value })}
+                      className="w-full border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors bg-transparent"
+                      data-testid="project-category-select">
                       <option>Residential</option>
                       <option>Commercial</option>
-                      <option>Urban</option>
-                      <option>Interior</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-[9px] uppercase tracking-widest text-black/40 mb-2">Year</label>
-                    <input
-                      type="text"
-                      value={projectForm.year}
-                      onChange={(e) => setProjectForm({ ...projectForm, year: e.target.value })}
-                      className="w-full border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors"
-                      required
-                      data-testid="project-year-input"
-                    />
+                    <input type="text" value={projectForm.year} required
+                      onChange={e => setProjectForm({ ...projectForm, year: e.target.value })}
+                      className="w-full border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors bg-transparent"
+                      data-testid="project-year-input" />
                   </div>
                   <div>
                     <label className="block text-[9px] uppercase tracking-widest text-black/40 mb-2">Location</label>
-                    <input
-                      type="text"
-                      value={projectForm.location}
-                      onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
-                      className="w-full border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors"
-                      required
-                      data-testid="project-location-input"
-                    />
+                    <input type="text" value={projectForm.location} required
+                      onChange={e => setProjectForm({ ...projectForm, location: e.target.value })}
+                      className="w-full border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors bg-transparent"
+                      data-testid="project-location-input" />
                   </div>
                 </div>
+
+                {/* COVER IMAGE */}
                 <div>
-                  <label className="block text-[9px] uppercase tracking-widest text-black/40 mb-2">Image URL</label>
-                  <input
-                    type="url"
-                    value={projectForm.image}
-                    onChange={(e) => setProjectForm({ ...projectForm, image: e.target.value })}
-                    className="w-full border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors"
+                  <label className="block text-[9px] uppercase tracking-widest text-black/40 mb-2">Cover Image URL <span className="text-black/25">(shown on portfolio grid)</span></label>
+                  <input type="url" value={projectForm.image} required
+                    onChange={e => setProjectForm({ ...projectForm, image: e.target.value })}
                     placeholder="https://images.unsplash.com/..."
-                    required
-                    data-testid="project-image-input"
-                  />
+                    className="w-full border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors bg-transparent"
+                    data-testid="project-image-input" />
+                  {projectForm.image && (
+                    <img src={projectForm.image} alt="preview"
+                      className="mt-3 h-24 w-40 object-cover border border-black/10 img-grayscale" />
+                  )}
                 </div>
+
+                {/* EXTRA IMAGES */}
+                <div>
+                  <label className="block text-[9px] uppercase tracking-widest text-black/40 mb-2">
+                    Additional Images <span className="text-black/25">(shown in lightbox gallery)</span>
+                  </label>
+
+                  {/* existing extra images */}
+                  {(projectForm.images || []).length > 0 && (
+                    <div className="flex flex-wrap gap-3 mb-4">
+                      {(projectForm.images || []).map((img, idx) => (
+                        <div key={idx} className="relative group">
+                          <img src={img} alt=""
+                            className="h-20 w-28 object-cover border border-black/10 img-grayscale" />
+                          <button type="button" onClick={() => removeExtraImage(idx)}
+                            className="absolute top-1 right-1 bg-black text-white w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* add new extra image */}
+                  <div className="flex gap-3">
+                    <input type="url" value={extraImageInput}
+                      onChange={e => setExtraImageInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addExtraImage())}
+                      placeholder="Paste image URL and click Add"
+                      className="flex-1 border-b border-black/20 py-2 outline-none text-sm focus:border-black transition-colors bg-transparent" />
+                    <button type="button" onClick={addExtraImage}
+                      className="px-4 py-2 border border-black text-[9px] uppercase tracking-widest hover:bg-black hover:text-white transition-all whitespace-nowrap">
+                      + Add
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-black/30 mt-2 tracking-wide">
+                    Add up to 10 images. Press Enter or click Add after each URL.
+                  </p>
+                </div>
+
+                {/* DESCRIPTION */}
                 <div>
                   <label className="block text-[9px] uppercase tracking-widest text-black/40 mb-2">Description</label>
-                  <textarea
-                    value={projectForm.description}
-                    onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
-                    className="w-full border border-black/20 p-4 outline-none text-sm focus:border-black transition-colors resize-none"
-                    rows="3"
-                    required
-                    data-testid="project-description-input"
-                  ></textarea>
+                  <textarea value={projectForm.description} required rows="3"
+                    onChange={e => setProjectForm({ ...projectForm, description: e.target.value })}
+                    className="w-full border border-black/20 p-4 outline-none text-sm focus:border-black transition-colors resize-none bg-transparent"
+                    data-testid="project-description-input" />
                 </div>
+
                 <div className="flex gap-4">
-                  <button
-                    type="submit"
+                  <button type="submit"
                     className="px-6 py-3 bg-black text-white text-[10px] uppercase tracking-[0.3em] hover:bg-black/90 transition-all"
-                    data-testid="project-save-button"
-                  >
+                    data-testid="project-save-button">
                     {editingProject ? 'Update Project' : 'Create Project'}
                   </button>
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
+                  <button type="button" onClick={cancelEdit}
                     className="px-6 py-3 border border-black text-[10px] uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all"
-                    data-testid="project-cancel-button"
-                  >
+                    data-testid="project-cancel-button">
                     Cancel
                   </button>
                 </div>
               </form>
             )}
 
-            <div className="grid grid-cols-1 gap-8">
-              {projects.map((project) => (
-                <div key={project.id} className="border border-black/10 p-6 hover:border-black/30 transition-colors" data-testid={`project-item-${project.id}`}>
-                  <div className="flex gap-8">
-                    <img src={project.image} alt={project.title} className="w-48 h-32 object-cover img-grayscale" />
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-xl font-serif italic mb-2">{project.title}</h3>
-                          <p className="text-[9px] uppercase tracking-widest text-black/40">
-                            {project.category} • {project.location} • {project.year}
-                          </p>
+            {/* PROJECT LIST */}
+            <div className="grid grid-cols-1 gap-6">
+              {projects.map(project => (
+                <div key={project.id}
+                  className="border border-black/10 p-6 hover:border-black/30 transition-colors"
+                  data-testid={`project-item-${project.id}`}>
+                  <div className="flex gap-6">
+                    {/* images strip */}
+                    <div className="flex gap-2 shrink-0">
+                      <img src={project.image} alt={project.title}
+                        className="w-40 h-28 object-cover img-grayscale border border-black/5" />
+                      {(project.images || []).slice(0, 2).map((img, i) => (
+                        <img key={i} src={img} alt=""
+                          className="w-16 h-28 object-cover img-grayscale border border-black/5 hidden md:block" />
+                      ))}
+                      {(project.images || []).length > 2 && (
+                        <div className="w-16 h-28 bg-stone-100 border border-black/5 hidden md:flex items-center justify-center">
+                          <span className="text-[9px] text-black/40 uppercase tracking-widest text-center">
+                            +{(project.images || []).length - 2}<br/>more
+                          </span>
                         </div>
-                        <div className="flex gap-4">
-                          <button
-                            onClick={() => startEdit(project)}
-                            className="text-[9px] uppercase tracking-widest text-black/60 hover:text-black"
-                            data-testid={`edit-project-${project.id}`}
-                          >
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="text-xl font-serif italic mb-1">{project.title}</h3>
+                          <p className="text-[9px] uppercase tracking-widest text-black/40">
+                            {project.category} · {project.location} · {project.year}
+                          </p>
+                          {(project.images || []).length > 0 && (
+                            <p className="text-[9px] text-black/30 mt-1 tracking-wide">
+                              {(project.images || []).length + 1} images in gallery
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-4 shrink-0 ml-4">
+                          <button onClick={() => startEdit(project)}
+                            className="text-[9px] uppercase tracking-widest text-black/60 hover:text-black transition-colors"
+                            data-testid={`edit-project-${project.id}`}>
                             Edit
                           </button>
-                          <button
-                            onClick={() => handleDeleteProject(project.id)}
-                            className="text-[9px] uppercase tracking-widest text-red-600 hover:text-red-800"
-                            data-testid={`delete-project-${project.id}`}
-                          >
+                          <button onClick={() => handleDeleteProject(project.id)}
+                            className="text-[9px] uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors"
+                            data-testid={`delete-project-${project.id}`}>
                             Delete
                           </button>
                         </div>
                       </div>
-                      <p className="text-sm text-black/60">{project.description}</p>
+                      <p className="text-sm text-black/55 leading-relaxed line-clamp-2">{project.description}</p>
                     </div>
                   </div>
                 </div>
@@ -435,6 +407,7 @@ const AdminPage = () => {
           </div>
         )}
 
+        {/* ── INQUIRIES TAB ── */}
         {activeTab === 'inquiries' && (
           <div>
             <h2 className="text-3xl font-serif italic mb-8">Contact Inquiries</h2>
@@ -442,8 +415,10 @@ const AdminPage = () => {
               <p className="text-center text-black/40 py-12 text-sm uppercase tracking-widest">No inquiries yet</p>
             ) : (
               <div className="space-y-6">
-                {inquiries.map((inquiry) => (
-                  <div key={inquiry.id} className="border border-black/10 p-8 hover:border-black/30 transition-colors" data-testid={`inquiry-item-${inquiry.id}`}>
+                {inquiries.map(inquiry => (
+                  <div key={inquiry.id}
+                    className="border border-black/10 p-8 hover:border-black/30 transition-colors"
+                    data-testid={`inquiry-item-${inquiry.id}`}>
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="text-lg font-medium mb-1">{inquiry.name}</h3>
@@ -452,11 +427,9 @@ const AdminPage = () => {
                           {new Date(inquiry.created_at).toLocaleString()}
                         </p>
                       </div>
-                      <button
-                        onClick={() => handleDeleteInquiry(inquiry.id)}
-                        className="text-[9px] uppercase tracking-widest text-red-600 hover:text-red-800"
-                        data-testid={`delete-inquiry-${inquiry.id}`}
-                      >
+                      <button onClick={() => handleDeleteInquiry(inquiry.id)}
+                        className="text-[9px] uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors"
+                        data-testid={`delete-inquiry-${inquiry.id}`}>
                         Delete
                       </button>
                     </div>
