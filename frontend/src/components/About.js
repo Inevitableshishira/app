@@ -1,40 +1,62 @@
 import React from 'react';
 
-const About = () => {
+const WhyUs = () => {
   return (
     <section
-      id="about"
+      id="why"
       className="bg-white py-40 border-t border-black/5"
     >
       <div className="max-w-7xl mx-auto px-6 md:px-16">
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+        {/* Section Title */}
+        <div className="mb-24">
+          <h2 data-scroll-anchor className="text-5xl md:text-8xl font-serif leading-none">
+            Our <br /> Commitment
+          </h2>
+        </div>
 
-          {/* LEFT — IMAGE */}
-          <div className="flex justify-center lg:justify-end">
-            <img
-              src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200"
-              alt="Studio space"
-              className="w-full max-w-lg h-[700px] object-cover img-grayscale border border-black/10"
-            />
+        {/* Points */}
+        <div className="space-y-24">
+
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-12 items-start">
+            <div className="md:col-span-1 text-6xl font-serif text-black/20">
+              01
+            </div>
+            <div className="md:col-span-5">
+              <h3 className="text-2xl font-serif mb-6">
+                The Wisdom of Experience
+              </h3>
+              <p className="text-base md:text-lg text-black/70 leading-relaxed font-light max-w-2xl">
+                True expertise is knowing what not to do. We preemptively avoid design pitfalls, saving you from unnecessary risk.
+              </p>
+            </div>
           </div>
 
-          {/* RIGHT — TEXT */}
-          <div className="flex justify-center lg:justify-start">
-            <div className="max-w-xl space-y-12">
-
-              <h2 data-scroll-anchor className="text-5xl md:text-8xl font-serif leading-none">
-                Our Philosophy:
-              </h2>
-
-              <p className="text-base md:text-lg text-black/80 leading-relaxed font-light">
-                <b>The Art of Precision At ApexForge Studio,</b> we believe space is the physical manifestation of purpose. Established to bridge the gap between architectural vision and functional reality, we provide end-to-end solutions for those who value design integrity and operational excellence.
-                <br /><br />
-                A Turnkey Approach We remove the "noise" of traditional construction by integrating design and build under one roof. Our process is designed to be seamless, allowing our clients to focus on their lives and businesses while we manage the complexities of the site. From initial structural concepts to the final interior finish, we deliver spaces that are ready for immediate use.
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-12 items-start">
+            <div className="md:col-span-1 text-6xl font-serif text-black/20">
+              02
+            </div>
+            <div className="md:col-span-5">
+              <h3 className="text-2xl font-serif mb-6">
+                Commitment to Trust
+              </h3>
+              <p className="text-base md:text-lg text-black/70 leading-relaxed font-light max-w-2xl">
+                We only commit to what we can truly deliver, building long-term relationships rooted in absolute transparency.
               </p>
+            </div>
+          </div>
 
-              <div className="border-t border-black/10 pt-8" />
-
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-12 items-start">
+            <div className="md:col-span-1 text-6xl font-serif text-black/20">
+              03
+            </div>
+            <div className="md:col-span-5">
+              <h3 className="text-2xl font-serif mb-6">
+                Design-Led Execution
+              </h3>
+              <p className="text-base md:text-lg text-black/70 leading-relaxed font-light max-w-2xl">
+                We curate environments that balance aesthetic beauty with functional intent.
+              </p>
             </div>
           </div>
 
@@ -45,4 +67,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default WhyUs;
