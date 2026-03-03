@@ -14,7 +14,7 @@ const Hero = () => {
       </div>
 
       {/* LEFT SIDE CONTENT */}
-      <div className="relative z-10 w-full lg:w-1/2 px-12">
+      <div className="relative z-10 w-full lg:w-1/2 px-6 md:px-16">
         <div className="max-w-3xl">
 
           {/* Main Heading */}
