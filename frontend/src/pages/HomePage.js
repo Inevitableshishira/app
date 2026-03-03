@@ -15,7 +15,8 @@ const HomePage = () => {
         <Hero />
 
         {/* PROCESS SECTION */}
-        <section id="process" className="py-40 px-8 max-w-7xl mx-auto">
+        <section id="process" className="py-32 border-t border-black/5">
+        <div className="max-w-7xl mx-auto px-6 md:px-16">
           <h2 data-scroll-anchor className="text-5xl md:text-6xl font-serif italic text-center mb-24">
             Our Seamless Process
           </h2>
@@ -59,13 +60,14 @@ const HomePage = () => {
             </div>
 
           </div>
+                </div>
         </section>
 
         <Portfolio />
 
         {/* SERVICES */}
         <section id="services" className="py-48 bg-black text-white">
-          <div className="max-w-7xl mx-auto px-8">
+          <div className="max-w-7xl mx-auto px-6 md:px-16">
             <span data-scroll-anchor className="block text-[10px] uppercase tracking-[0.6em] text-white/30 mb-20 text-center">
               Services
             </span>
