@@ -6,7 +6,7 @@ const WhyUs = () => {
       id="why"
       className="bg-white py-40 border-t border-black/5"
     >
-      <div className="max-w-6xl mx-auto px-8">
+      <div className="max-w-7xl mx-auto px-6 md:px-16">
 
         {/* Section Title */}
         <div className="mb-24">
