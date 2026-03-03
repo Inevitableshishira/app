@@ -35,7 +35,7 @@ const Footer = () => {
 
   return (
     <footer id="contact" className="bg-black text-white pt-32 pb-16">
-      <div className="max-w-7xl mx-auto px-8">
+      <div className="max-w-7xl mx-auto px-6 md:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 mb-40">
 
           {/* LEFT SIDE */}
