@@ -415,7 +415,7 @@ const Portfolio = () => {
   return (
     <>
       <section id="portfolio" className="py-40 bg-white">
-        <div className="max-w-7xl mx-auto px-8">
+        <div className="max-w-7xl mx-auto px-6 md:px-16">
 
           {/* HEADER */}
           <div className="flex flex-col md:flex-row justify-between items-baseline mb-24 border-b border-black/5 pb-12 gap-8">
