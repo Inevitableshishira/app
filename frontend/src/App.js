@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from '@vercel/analytics/react';
 import CustomCursor from "./components/CustomCursor";
 import HomePage from './pages/HomePage';
 import AdminPage from './pages/AdminPage';
@@ -19,6 +20,7 @@ function App() {
         </Routes>
       </div>
       <SpeedInsights />
+      <Analytics />
     </BrowserRouter>
   );
 }
