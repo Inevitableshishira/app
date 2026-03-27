@@ -20,12 +20,12 @@ const toDirectUrl = (url) => {
 /* ─── LIGHTBOX ─────────────────────────────────────────────── */
 const Lightbox = ({ project, onClose }) => {
   const allImages = [project.image, ...(project.images || [])].filter(Boolean).map(toDirectUrl);
-  const [active, setActive]       = useState(0);
-  const [visible, setVisible]     = useState(false);
-  const [dragging, setDragging]   = useState(false);
+  const [active, setActive]         = useState(0);
+  const [visible, setVisible]       = useState(false);
+  const [dragging, setDragging]     = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
-  const [imgLoaded, setImgLoaded] = useState({});
-  const [isMobile, setIsMobile]   = useState(false);
+  const [imgLoaded, setImgLoaded]   = useState({});
+  const [isMobile, setIsMobile]     = useState(false);
   const touchStartX = useRef(null);
   const trackRef    = useRef(null);
 
@@ -71,7 +71,7 @@ const Lightbox = ({ project, onClose }) => {
     else setDragOffset(0);
   };
 
-  const trackW    = trackRef.current?.offsetWidth || (typeof window !== 'undefined' ? window.innerWidth : 1);
+  const trackW     = trackRef.current?.offsetWidth || (typeof window !== 'undefined' ? window.innerWidth : 1);
   const translateX = -active * 100 + (dragOffset / trackW) * 100;
 
   /* ── MOBILE — fullscreen swipe ── */
@@ -192,25 +192,41 @@ const SkeletonCard = () => (
 
 /* ─── PORTFOLIO ─────────────────────────────────────────────── */
 const Portfolio = () => {
-  const [filter, setFilter]     = useState('All');
-  const [projects, setProjects] = useState(_cache || []);
-  const [loading, setLoading]   = useState(!_cache);
-  const [selected, setSelected] = useState(null);
+  const [filter, setFilter]       = useState('All');
+  const [projects, setProjects]   = useState(_cache || []);
+  const [loading, setLoading]     = useState(!_cache);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [selected, setSelected]   = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
   const categories = ['All', 'Residential', 'Commercial'];
 
-  useEffect(() => {
-    if (_cache) return;
+  const fetchProjects = useCallback(() => {
+    setLoading(true);
+    setLoadFailed(false);
     let cancelled = false;
-    axios.get(`${API}/projects`).then(res => {
-      if (cancelled) return;
-      const data = Array.isArray(res.data) ? res.data : [];
-      _cache = data;
-      setProjects(data);
-      setLoading(false);
-    }).catch(() => { if (!cancelled) setLoading(false); });
+
+    axios.get(`${API}/projects`, { timeout: 8000 })
+      .then(res => {
+        if (cancelled) return;
+        const data = Array.isArray(res.data) ? res.data : [];
+        _cache = data;
+        setProjects(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLoading(false);
+        setLoadFailed(true);
+      });
+
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    if (_cache) { setProjects(_cache); setLoading(false); return; }
+    const cancel = fetchProjects();
+    return cancel;
+  }, [fetchProjects]);
 
   const filtered = filter === 'All' ? projects : projects.filter(p => p.category === filter);
 
@@ -234,37 +250,53 @@ const Portfolio = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-24">
             {loading
               ? [0,1,2,3].map(i => <SkeletonCard key={i} />)
-              : filtered.length === 0
-                ? <div className="col-span-2 text-center py-20"><p className="text-sm text-black/40 uppercase tracking-widest">Coming Soon...</p></div>
-                : filtered.map((p, i) => (
-                  <div key={p.id||i} className="group" style={{ cursor:'pointer' }}
-                    onClick={() => setSelected(p)}
-                    onMouseEnter={() => setHoveredId(p.id)}
-                    onMouseLeave={() => setHoveredId(null)}
-                  >
-                    <div className="relative overflow-hidden mb-8" style={{ aspectRatio:'4/3', background:'#f4f4f4', border:'1px solid rgba(0,0,0,0.06)' }}>
-                      <img src={toDirectUrl(p.image)} alt={p.title} loading="lazy" decoding="async"
-                        style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover',
-                          transform:hoveredId===p.id?'scale(1.04)':'scale(1)',
-                          filter:hoveredId===p.id?'grayscale(0%)':'grayscale(100%)',
-                          transition:'transform 0.55s cubic-bezier(0.4,0,0.2,1),filter 0.4s ease' }} />
-                      <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.32)', display:'flex', alignItems:'center', justifyContent:'center', opacity:hoveredId===p.id?1:0, transition:'opacity 0.3s ease' }}>
-                        <span style={{ color:'#fff', fontSize:10, textTransform:'uppercase', letterSpacing:'0.4em', borderBottom:'1px solid rgba(255,255,255,0.6)', paddingBottom:4, transform:hoveredId===p.id?'translateY(0)':'translateY(8px)', transition:'transform 0.3s ease' }}>View Project</span>
-                      </div>
-                      {p.images && p.images.length > 0 && (
-                        <span style={{ position:'absolute', top:12, right:12, background:'rgba(0,0,0,0.55)', color:'#fff', fontSize:9, padding:'4px 10px', letterSpacing:'0.15em', textTransform:'uppercase' }}>{p.images.length+1} photos</span>
-                      )}
-                    </div>
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                        <p className="text-[9px] uppercase tracking-widest text-black/30">{p.location} — {p.year}</p>
-                        <h3 className="text-2xl font-serif italic" style={{ color:hoveredId===p.id?'#000':'#222', transition:'color 0.2s' }}>{p.title}</h3>
-                        <p className="text-sm text-black/55 mt-2 leading-relaxed line-clamp-2">{p.description}</p>
-                      </div>
-                      <span className="text-[8px] border border-black/10 px-3 py-1 uppercase tracking-widest text-black/40 shrink-0 ml-4">{p.category}</span>
-                    </div>
+              : loadFailed
+                ? (
+                  <div className="col-span-2 text-center py-20 space-y-6">
+                    <p className="text-sm text-black/40 uppercase tracking-widest">Could not load projects.</p>
+                    <button
+                      onClick={() => { _cache = null; fetchProjects(); }}
+                      className="text-[10px] uppercase tracking-[0.3em] border-b border-black pb-1 hover:opacity-50 transition-opacity"
+                    >
+                      Retry
+                    </button>
                   </div>
-                ))
+                )
+                : filtered.length === 0
+                  ? (
+                    <div className="col-span-2 text-center py-20">
+                      <p className="text-sm text-black/40 uppercase tracking-widest">Coming Soon...</p>
+                    </div>
+                  )
+                  : filtered.map((p, i) => (
+                    <div key={p.id||i} className="group" style={{ cursor:'pointer' }}
+                      onClick={() => setSelected(p)}
+                      onMouseEnter={() => setHoveredId(p.id)}
+                      onMouseLeave={() => setHoveredId(null)}
+                    >
+                      <div className="relative overflow-hidden mb-8" style={{ aspectRatio:'4/3', background:'#f4f4f4', border:'1px solid rgba(0,0,0,0.06)' }}>
+                        <img src={toDirectUrl(p.image)} alt={p.title} loading="lazy" decoding="async"
+                          style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover',
+                            transform:hoveredId===p.id?'scale(1.04)':'scale(1)',
+                            filter:hoveredId===p.id?'grayscale(0%)':'grayscale(100%)',
+                            transition:'transform 0.55s cubic-bezier(0.4,0,0.2,1),filter 0.4s ease' }} />
+                        <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.32)', display:'flex', alignItems:'center', justifyContent:'center', opacity:hoveredId===p.id?1:0, transition:'opacity 0.3s ease' }}>
+                          <span style={{ color:'#fff', fontSize:10, textTransform:'uppercase', letterSpacing:'0.4em', borderBottom:'1px solid rgba(255,255,255,0.6)', paddingBottom:4, transform:hoveredId===p.id?'translateY(0)':'translateY(8px)', transition:'transform 0.3s ease' }}>View Project</span>
+                        </div>
+                        {p.images && p.images.length > 0 && (
+                          <span style={{ position:'absolute', top:12, right:12, background:'rgba(0,0,0,0.55)', color:'#fff', fontSize:9, padding:'4px 10px', letterSpacing:'0.15em', textTransform:'uppercase' }}>{p.images.length+1} photos</span>
+                        )}
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <p className="text-[9px] uppercase tracking-widest text-black/30">{p.location} — {p.year}</p>
+                          <h3 className="text-2xl font-serif italic" style={{ color:hoveredId===p.id?'#000':'#222', transition:'color 0.2s' }}>{p.title}</h3>
+                          <p className="text-sm text-black/55 mt-2 leading-relaxed line-clamp-2">{p.description}</p>
+                        </div>
+                        <span className="text-[8px] border border-black/10 px-3 py-1 uppercase tracking-widest text-black/40 shrink-0 ml-4">{p.category}</span>
+                      </div>
+                    </div>
+                  ))
             }
           </div>
         </div>
