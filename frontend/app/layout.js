@@ -47,6 +47,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <head>
+        <link rel="preconnect" href="https://apexforge-backend.onrender.com" />
+<link rel="dns-prefetch" href="https://apexforge-backend.onrender.com" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
