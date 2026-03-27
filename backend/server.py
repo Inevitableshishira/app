@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -7,6 +7,9 @@ from typing import List, Optional
 from datetime import datetime, timezone, timedelta
 from passlib.context import CryptContext
 from jose import JWTError, jwt
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import resend
 import os
 import uuid
@@ -14,15 +17,20 @@ import logging
 
 # ================= ENV =================
 
-MONGO_URL = os.environ.get("MONGO_URL")
-DB_NAME = os.environ.get("DB_NAME", "apexforge")
+MONGO_URL      = os.environ.get("MONGO_URL")
+DB_NAME        = os.environ.get("DB_NAME", "apexforge")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 
 resend.api_key = RESEND_API_KEY
 
 # ================= APP =================
 
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 api_router = APIRouter(prefix="/api")
 
 # ================= DATABASE =================
@@ -33,11 +41,11 @@ db = client[DB_NAME]
 # ================= SECURITY =================
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-security = HTTPBearer()
+security    = HTTPBearer()
 
-SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "change-this-in-production")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1440
+SECRET_KEY                  = os.environ.get("JWT_SECRET_KEY", "change-this-in-production")
+ALGORITHM                   = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours
 
 # ================= MODELS =================
 
@@ -46,8 +54,8 @@ class Project(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
     category: str
-    image: str                          # primary / cover image (kept for backwards compat)
-    images: Optional[List[str]] = []    # additional images for lightbox
+    image: str
+    images: Optional[List[str]] = []
     year: str
     location: str
     description: str
@@ -63,12 +71,12 @@ class ProjectCreate(BaseModel):
     description: str
 
 class ProjectUpdate(BaseModel):
-    title: Optional[str] = None
-    category: Optional[str] = None
-    image: Optional[str] = None
+    title: Optional[str]       = None
+    category: Optional[str]    = None
+    image: Optional[str]       = None
     images: Optional[List[str]] = None
-    year: Optional[str] = None
-    location: Optional[str] = None
+    year: Optional[str]        = None
+    location: Optional[str]    = None
     description: Optional[str] = None
 
 class ContactInquiry(BaseModel):
@@ -102,46 +110,51 @@ def get_password_hash(password):
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire    = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        payload  = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        username = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=401, detail="Invalid token")
         return username
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-# ================= EMAIL FUNCTION =================
+# ================= EMAIL =================
 
 async def send_email_notification(inquiry: ContactInquiry):
     if not RESEND_API_KEY:
-        logging.warning("Resend API key not set.")
+        logging.warning("Resend API key not set — email not sent.")
         return
     try:
         resend.Emails.send({
             "from": os.environ.get("SENDER_EMAIL", "noreply@apexforgestudio.in"),
             "to": [os.environ.get("ADMIN_EMAIL", "shreesha@apexforgestudio.in")],
-            "subject": f"New Website Inquiry - {inquiry.name}",
+            "subject": f"New Website Inquiry — {inquiry.name}",
             "html": f"""
-                <div style="font-family: Arial; padding:20px;">
-                    <h2>New Inquiry Received</h2>
+                <div style="font-family: Arial; padding: 20px; max-width: 600px;">
+                    <h2 style="border-bottom: 1px solid #eee; padding-bottom: 12px;">New Inquiry Received</h2>
                     <p><strong>Name:</strong> {inquiry.name}</p>
                     <p><strong>Email:</strong> {inquiry.email}</p>
                     <p><strong>Date:</strong> {inquiry.created_at.strftime('%Y-%m-%d %H:%M UTC')}</p>
-                    <hr/>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 16px 0;" />
                     <p><strong>Message:</strong></p>
-                    <p>{inquiry.message}</p>
+                    <p style="background: #f9f9f9; padding: 16px; border-left: 3px solid #000;">
+                        {inquiry.message}
+                    </p>
+                    <p style="color: #999; font-size: 12px; margin-top: 24px;">
+                        Reply directly to this email to respond to {inquiry.name}.
+                    </p>
                 </div>
             """
         })
-        logging.info("Email sent successfully")
+        logging.info("Inquiry email sent successfully")
     except Exception as e:
-        logging.error(f"Email sending failed: {str(e)}")
+        logging.error(f"Email send failed: {str(e)}")
 
 # ================= PUBLIC ROUTES =================
 
@@ -155,13 +168,13 @@ async def get_projects():
     for p in projects:
         if isinstance(p.get("created_at"), str):
             p["created_at"] = datetime.fromisoformat(p["created_at"])
-        # backfill images field for older records
         if "images" not in p:
             p["images"] = []
     return projects
 
 @api_router.post("/contact", response_model=ContactInquiry)
-async def submit_contact(inquiry: ContactInquiryCreate):
+@limiter.limit("5/minute")
+async def submit_contact(request: Request, inquiry: ContactInquiryCreate):
     inquiry_obj = ContactInquiry(**inquiry.model_dump())
     doc = inquiry_obj.model_dump()
     doc["created_at"] = doc["created_at"].isoformat()
@@ -172,11 +185,23 @@ async def submit_contact(inquiry: ContactInquiryCreate):
 # ================= ADMIN ROUTES =================
 
 @api_router.post("/admin/login", response_model=Token)
-async def admin_login(credentials: AdminLogin):
-    admin_user = os.environ.get("ADMIN_USERNAME", "admin")
-    admin_pass = os.environ.get("ADMIN_PASSWORD", "admin123")
-    if credentials.username != admin_user or credentials.password != admin_pass:
+@limiter.limit("10/minute")
+async def admin_login(request: Request, credentials: AdminLogin):
+    admin_user       = os.environ.get("ADMIN_USERNAME", "admin")
+    admin_pass_hash  = os.environ.get("ADMIN_PASSWORD_HASH", "")
+    admin_pass_plain = os.environ.get("ADMIN_PASSWORD", "admin123")
+
+    if credentials.username != admin_user:
         raise HTTPException(status_code=401, detail="Incorrect credentials")
+
+    # Use bcrypt hash if set, fall back to plaintext (for backwards compat)
+    if admin_pass_hash:
+        if not verify_password(credentials.password, admin_pass_hash):
+            raise HTTPException(status_code=401, detail="Incorrect credentials")
+    else:
+        if credentials.password != admin_pass_plain:
+            raise HTTPException(status_code=401, detail="Incorrect credentials")
+
     token = create_access_token({"sub": credentials.username})
     return {"access_token": token, "token_type": "bearer"}
 
