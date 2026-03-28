@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 
 const API = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
-
 let _cache = null;
 
 const toDirectUrl = (url) => {
@@ -17,21 +16,25 @@ const toDirectUrl = (url) => {
   return url;
 };
 
-/* ─── LIGHTBOX ─────────────────────────────────────────────── */
+/* ─── LIGHTBOX ──────────────────────────────────────────────── */
 const Lightbox = ({ project, onClose }) => {
   const allImages = [project.image, ...(project.images || [])].filter(Boolean).map(toDirectUrl);
-  const [active, setActive]         = useState(0);
-  const [visible, setVisible]       = useState(false);
-  const [dragging, setDragging]     = useState(false);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [imgLoaded, setImgLoaded]   = useState({});
-  const [isMobile, setIsMobile]     = useState(false);
+  const [active, setActive]               = useState(0);
+  const [visible, setVisible]             = useState(false);
+  const [dragging, setDragging]           = useState(false);
+  const [dragOffset, setDragOffset]       = useState(0);
+  const [imgLoaded, setImgLoaded]         = useState({});
+  const [isMobile, setIsMobile]           = useState(false);
+  const [thumbsVisible, setThumbsVisible] = useState(false);
   const touchStartX = useRef(null);
   const trackRef    = useRef(null);
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
-    requestAnimationFrame(() => setVisible(true));
+    requestAnimationFrame(() => {
+      setVisible(true);
+      setTimeout(() => setThumbsVisible(true), 200);
+    });
     document.body.style.overflow = 'hidden';
     allImages.forEach((src, i) => {
       const img = new window.Image();
@@ -43,7 +46,8 @@ const Lightbox = ({ project, onClose }) => {
 
   const close = useCallback(() => {
     setVisible(false);
-    setTimeout(onClose, 280);
+    setThumbsVisible(false);
+    setTimeout(onClose, 320);
   }, [onClose]);
 
   useEffect(() => {
@@ -79,110 +83,90 @@ const Lightbox = ({ project, onClose }) => {
 
   /* ── MOBILE ── */
   if (isMobile) return (
-    <div style={{ position:'fixed', inset:0, zIndex:9999, background:'#000', opacity:visible?1:0, transition:'opacity 0.28s ease', userSelect:'none', touchAction:'pan-y' }}>
-      {/* Top bar */}
-      <div style={{ position:'absolute', top:0, left:0, right:0, zIndex:10, padding:'16px 20px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'linear-gradient(to bottom,rgba(0,0,0,0.75),transparent)' }}>
-        <button onClick={close} style={{ display:'flex', alignItems:'center', gap:8, background:'none', border:'none', color:'#fff', cursor:'pointer', fontSize:12, letterSpacing:'0.2em', textTransform:'uppercase', fontFamily:'var(--font-inter),Inter,sans-serif' }}>
-          <span style={{ fontSize:18 }}>←</span> Back
+    <div style={{ position:'fixed', inset:0, zIndex:9999, background:'#000', opacity:visible?1:0, transition:'opacity 0.32s cubic-bezier(0.4,0,0.2,1)', userSelect:'none', touchAction:'pan-y' }}>
+      <div style={{ position:'absolute', top:0, left:0, right:0, zIndex:10, padding:'16px 20px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'linear-gradient(to bottom,rgba(0,0,0,0.8),transparent)' }}>
+        <button onClick={close} style={{ display:'flex', alignItems:'center', gap:8, background:'none', border:'none', color:'#fff', cursor:'pointer', fontSize:11, letterSpacing:'0.25em', textTransform:'uppercase', fontFamily:'inherit' }}>
+          <span style={{ fontSize:20 }}>←</span> Close
         </button>
-        {allImages.length > 1 && (
-          <span style={{ fontSize:11, color:'rgba(255,255,255,0.55)', letterSpacing:'0.2em' }}>{active+1} / {allImages.length}</span>
-        )}
+        {allImages.length > 1 && <span style={{ fontSize:11, color:'rgba(255,255,255,0.5)', letterSpacing:'0.2em' }}>{active+1} / {allImages.length}</span>}
       </div>
-
-      {/* Swipeable track */}
-      <div ref={trackRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
-        style={{ position:'absolute', inset:0, overflow:'hidden', cursor:'grab' }}>
-        <div style={{ display:'flex', width:`${allImages.length*100}%`, height:'100%', transform:`translateX(${translateX/allImages.length}%)`, transition:dragging?'none':'transform 0.32s cubic-bezier(0.4,0,0.2,1)', willChange:'transform' }}>
+      <div ref={trackRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} style={{ position:'absolute', inset:0, overflow:'hidden' }}>
+        <div style={{ display:'flex', width:`${allImages.length*100}%`, height:'100%', transform:`translateX(${translateX/allImages.length}%)`, transition:dragging?'none':'transform 0.36s cubic-bezier(0.4,0,0.2,1)', willChange:'transform' }}>
           {allImages.map((img, i) => (
             <div key={i} style={{ width:`${100/allImages.length}%`, height:'100%', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <img src={img} alt="" draggable={false} style={{ width:'100%', height:'100%', objectFit:'contain', pointerEvents:'none' }} />
+              <img src={img} alt="" draggable={false} style={{ width:'100%', height:'100%', objectFit:'contain', pointerEvents:'none', opacity:imgLoaded[i]?1:0, transition:'opacity 0.3s' }} />
             </div>
           ))}
         </div>
       </div>
-
-      {/* Dot indicators */}
       {allImages.length > 1 && (
-        <div style={{ position:'absolute', bottom:80, left:'50%', transform:'translateX(-50%)', display:'flex', gap:6, zIndex:10 }}>
-          {allImages.map((_,i) => (
-            <button key={i} onClick={()=>goTo(i)} style={{ width:i===active?22:6, height:6, borderRadius:3, border:'none', padding:0, cursor:'pointer', background:i===active?'#fff':'rgba(255,255,255,0.35)', transition:'all 0.25s ease' }} />
-          ))}
+        <div style={{ position:'absolute', bottom:80, left:'50%', transform:'translateX(-50%)', display:'flex', gap:7, zIndex:10 }}>
+          {allImages.map((_,i) => <button key={i} onClick={()=>goTo(i)} style={{ width:i===active?24:6, height:6, borderRadius:3, border:'none', padding:0, cursor:'pointer', background:i===active?'#fff':'rgba(255,255,255,0.3)', transition:'all 0.28s cubic-bezier(0.4,0,0.2,1)' }} />)}
         </div>
       )}
-
-      {/* Bottom — inquire */}
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, zIndex:10, background:'linear-gradient(to top,rgba(0,0,0,0.8) 60%,transparent)', padding:'36px 24px 24px', display:'flex', justifyContent:'flex-end' }}>
-        <a href="#contact" onClick={close} style={{ padding:'12px 28px', background:'#fff', color:'#111', fontSize:9, textTransform:'uppercase', letterSpacing:'0.3em', textDecoration:'none', fontWeight:600 }}>
-          Inquire Now
-        </a>
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, zIndex:10, background:'linear-gradient(to top,rgba(0,0,0,0.85) 60%,transparent)', padding:'36px 24px 24px', display:'flex', justifyContent:'flex-end' }}>
+        <a href="#contact" onClick={close} style={{ padding:'12px 28px', background:'#fff', color:'#111', fontSize:9, textTransform:'uppercase', letterSpacing:'0.35em', textDecoration:'none', fontWeight:700 }}>Inquire Now</a>
       </div>
     </div>
   );
 
-  /* ── DESKTOP — fullscreen, pure image focus ── */
+  /* ── DESKTOP — immersive fullscreen ── */
   return (
-    <div onClick={(e)=>e.target===e.currentTarget&&close()}
-      style={{ position:'fixed', inset:0, zIndex:9999, background:'rgba(0,0,0,0.94)', display:'flex', alignItems:'center', justifyContent:'center', opacity:visible?1:0, transition:'opacity 0.28s ease' }}>
+    <div onClick={(e)=>e.target===e.currentTarget&&close()} style={{ position:'fixed', inset:0, zIndex:9999, background:visible?'rgba(0,0,0,0.96)':'rgba(0,0,0,0)', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.36s cubic-bezier(0.4,0,0.2,1)' }}>
 
       {/* Close */}
-      <button onClick={close} style={{ position:'absolute', top:24, right:28, background:'none', border:'none', color:'rgba(255,255,255,0.45)', fontSize:26, cursor:'pointer', lineHeight:1, zIndex:10, transition:'color 0.2s' }}
-        onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='rgba(255,255,255,0.45)'}>✕</button>
+      <button onClick={close} style={{ position:'absolute', top:24, right:28, background:'none', border:'none', color:visible?'rgba(255,255,255,0.5)':'transparent', fontSize:22, cursor:'pointer', lineHeight:1, zIndex:10, transition:'color 0.2s', fontFamily:'inherit' }}
+        onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='rgba(255,255,255,0.5)'}>✕</button>
 
       {/* Counter */}
       {allImages.length > 1 && (
-        <div style={{ position:'absolute', top:28, left:'50%', transform:'translateX(-50%)', fontSize:10, color:'rgba(255,255,255,0.35)', letterSpacing:'0.35em', textTransform:'uppercase', zIndex:10 }}>
+        <div style={{ position:'absolute', top:28, left:'50%', transform:'translateX(-50%)', fontSize:10, color:'rgba(255,255,255,0.35)', letterSpacing:'0.4em', textTransform:'uppercase', zIndex:10, opacity:visible?1:0, transition:'opacity 0.4s 0.1s', fontFamily:'inherit' }}>
           {active+1} &nbsp;/&nbsp; {allImages.length}
         </div>
       )}
 
-      {/* Prev */}
+      {/* Arrows */}
       {allImages.length > 1 && (
-        <button onClick={()=>goTo((active-1+allImages.length)%allImages.length)}
-          style={{ position:'absolute', left:20, top:'50%', transform:'translateY(-50%)', zIndex:5, background:'none', border:'none', color:active===0?'rgba(255,255,255,0.12)':'rgba(255,255,255,0.55)', cursor:active===0?'default':'pointer', fontSize:44, lineHeight:1, padding:'0 12px', transition:'color 0.2s' }}
-          onMouseEnter={e=>{ if(active!==0) e.currentTarget.style.color='#fff'; }}
-          onMouseLeave={e=>e.currentTarget.style.color=active===0?'rgba(255,255,255,0.12)':'rgba(255,255,255,0.55)'}>‹</button>
+        <>
+          <button onClick={()=>goTo((active-1+allImages.length)%allImages.length)} disabled={active===0}
+            style={{ position:'absolute', left:20, top:'50%', transform:'translateY(-50%)', zIndex:5, background:'none', border:'none', color:active===0?'rgba(255,255,255,0.1)':'rgba(255,255,255,0.55)', cursor:active===0?'default':'pointer', fontSize:48, lineHeight:1, padding:'0 14px', transition:'color 0.2s, transform 0.15s', fontFamily:'inherit' }}
+            onMouseEnter={e=>{ if(active!==0){e.currentTarget.style.color='#fff';e.currentTarget.style.transform='translateY(-50%) translateX(-3px)';}}}
+            onMouseLeave={e=>{ e.currentTarget.style.color=active===0?'rgba(255,255,255,0.1)':'rgba(255,255,255,0.55)';e.currentTarget.style.transform='translateY(-50%)'; }}>‹</button>
+          <button onClick={()=>goTo((active+1)%allImages.length)} disabled={active===allImages.length-1}
+            style={{ position:'absolute', right:20, top:'50%', transform:'translateY(-50%)', zIndex:5, background:'none', border:'none', color:active===allImages.length-1?'rgba(255,255,255,0.1)':'rgba(255,255,255,0.55)', cursor:active===allImages.length-1?'default':'pointer', fontSize:48, lineHeight:1, padding:'0 14px', transition:'color 0.2s, transform 0.15s', fontFamily:'inherit' }}
+            onMouseEnter={e=>{ if(active!==allImages.length-1){e.currentTarget.style.color='#fff';e.currentTarget.style.transform='translateY(-50%) translateX(3px)';}}}
+            onMouseLeave={e=>{ e.currentTarget.style.color=active===allImages.length-1?'rgba(255,255,255,0.1)':'rgba(255,255,255,0.55)';e.currentTarget.style.transform='translateY(-50%)'; }}>›</button>
+        </>
       )}
 
-      {/* Next */}
-      {allImages.length > 1 && (
-        <button onClick={()=>goTo((active+1)%allImages.length)}
-          style={{ position:'absolute', right:20, top:'50%', transform:'translateY(-50%)', zIndex:5, background:'none', border:'none', color:active===allImages.length-1?'rgba(255,255,255,0.12)':'rgba(255,255,255,0.55)', cursor:active===allImages.length-1?'default':'pointer', fontSize:44, lineHeight:1, padding:'0 12px', transition:'color 0.2s' }}
-          onMouseEnter={e=>{ if(active!==allImages.length-1) e.currentTarget.style.color='#fff'; }}
-          onMouseLeave={e=>e.currentTarget.style.color=active===allImages.length-1?'rgba(255,255,255,0.12)':'rgba(255,255,255,0.55)'}>›</button>
-      )}
-
-      {/* Image track */}
+      {/* Main image track */}
       <div ref={trackRef}
         onMouseDown={onTouchStart} onMouseMove={(e)=>dragging&&onTouchMove(e)} onMouseUp={onTouchEnd} onMouseLeave={onTouchEnd}
         onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
-        style={{ width:'calc(100% - 120px)', height:'calc(100vh - 110px)', overflow:'hidden', cursor:dragging?'grabbing':'grab', display:'flex', alignItems:'center', justifyContent:'center' }}>
-        <div style={{ display:'flex', width:`${allImages.length*100}%`, height:'100%', transform:`translateX(${translateX/allImages.length}%)`, transition:dragging?'none':'transform 0.32s cubic-bezier(0.4,0,0.2,1)', willChange:'transform' }}>
-          {allImages.map((img,i) => (
+        style={{ width:'calc(100% - 130px)', height:'calc(100vh - 130px)', overflow:'hidden', cursor:dragging?'grabbing':'grab', display:'flex', alignItems:'center', justifyContent:'center', opacity:visible?1:0, transform:visible?'scale(1)':'scale(0.95)', transition:'opacity 0.36s cubic-bezier(0.4,0,0.2,1), transform 0.36s cubic-bezier(0.4,0,0.2,1)' }}>
+        <div style={{ display:'flex', width:`${allImages.length*100}%`, height:'100%', transform:`translateX(${translateX/allImages.length}%)`, transition:dragging?'none':'transform 0.36s cubic-bezier(0.4,0,0.2,1)', willChange:'transform' }}>
+          {allImages.map((img, i) => (
             <div key={i} style={{ width:`${100/allImages.length}%`, height:'100%', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <img src={img} alt="" draggable={false}
-                style={{ maxWidth:'100%', maxHeight:'100%', objectFit:'contain', opacity:imgLoaded[i]?1:0, transition:'opacity 0.3s ease', pointerEvents:'none', userSelect:'none' }} />
+              <img src={img} alt="" draggable={false} style={{ maxWidth:'100%', maxHeight:'100%', objectFit:'contain', pointerEvents:'none', userSelect:'none', opacity:imgLoaded[i]?1:0, transition:'opacity 0.4s ease' }} />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Bottom bar — thumbnails + inquire */}
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, zIndex:10, padding:'18px 40px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'linear-gradient(to top,rgba(0,0,0,0.65),transparent)' }}>
+      {/* Bottom bar */}
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, zIndex:10, padding:'20px 48px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'linear-gradient(to top,rgba(0,0,0,0.7) 60%,transparent)', opacity:thumbsVisible?1:0, transform:thumbsVisible?'translateY(0)':'translateY(12px)', transition:'opacity 0.4s 0.15s, transform 0.4s 0.15s' }}>
         {allImages.length > 1 ? (
-          <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-            {allImages.map((img,i) => (
-              <button key={i} onClick={()=>goTo(i)}
-                style={{ width:52, height:38, padding:0, border:'none', cursor:'pointer', overflow:'hidden', flexShrink:0, outline:i===active?'2px solid #fff':'2px solid transparent', outlineOffset:2, transition:'outline 0.2s,opacity 0.2s', opacity:i===active?1:0.4 }}>
-                <img src={img} alt="" draggable={false} style={{ width:'100%', height:'100%', objectFit:'cover', pointerEvents:'none' }} />
+          <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+            {allImages.map((img, i) => (
+              <button key={i} onClick={()=>goTo(i)} style={{ width:i===active?64:48, height:44, padding:0, border:'none', cursor:'pointer', overflow:'hidden', flexShrink:0, outline:i===active?'1.5px solid rgba(255,255,255,0.9)':'1.5px solid transparent', outlineOffset:2, opacity:i===active?1:0.38, transition:'all 0.3s cubic-bezier(0.4,0,0.2,1)' }}>
+                <img src={img} alt="" draggable={false} style={{ width:'100%', height:'100%', objectFit:'cover', pointerEvents:'none', display:'block' }} />
               </button>
             ))}
           </div>
         ) : <div />}
-
-        <a href="#contact" onClick={close}
-          style={{ padding:'11px 28px', background:'#fff', color:'#111', fontSize:9, textTransform:'uppercase', letterSpacing:'0.3em', textDecoration:'none', fontWeight:600, transition:'background 0.2s' }}
-          onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.85)'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
+        <a href="#contact" onClick={close} style={{ padding:'12px 32px', background:'#fff', color:'#111', fontSize:9, textTransform:'uppercase', letterSpacing:'0.4em', textDecoration:'none', fontWeight:700, flexShrink:0, transition:'background 0.2s, transform 0.15s', display:'inline-block' }}
+          onMouseEnter={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.88)';e.currentTarget.style.transform='translateY(-1px)'; }}
+          onMouseLeave={e=>{ e.currentTarget.style.background='#fff';e.currentTarget.style.transform='translateY(0)'; }}>
           Inquire Now
         </a>
       </div>
@@ -190,22 +174,169 @@ const Lightbox = ({ project, onClose }) => {
   );
 };
 
-/* ─── SKELETON ──────────────────────────────────────────────── */
+/* ─── ANIMATED PROJECT CARD ─────────────────────────────────── */
+const ProjectCard = ({ project, index, onOpen }) => {
+  const [hovered, setHovered]   = useState(false);
+  const [entered, setEntered]   = useState(false);
+  const [mousePos, setMousePos] = useState({ x:0.5, y:0.5 });
+  const cardRef = useRef(null);
+  const isWide  = index === 0;
+  const allCount = 1 + (project.images?.length || 0);
+
+  /* staggered entrance animation */
+  useEffect(() => {
+    const t = setTimeout(() => setEntered(true), index * 80 + 60);
+    return () => clearTimeout(t);
+  }, [index]);
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    setMousePos({
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top)  / rect.height,
+    });
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onClick={onOpen}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setMousePos({ x:0.5, y:0.5 }); }}
+      onMouseMove={handleMouseMove}
+      style={{
+        gridColumn: isWide ? 'span 2 / span 2' : undefined,
+        position:'relative',
+        cursor:'pointer',
+        opacity: entered ? 1 : 0,
+        transform: entered ? 'translateY(0)' : 'translateY(28px)',
+        transition:`opacity 0.65s cubic-bezier(0.4,0,0.2,1) ${index*70}ms, transform 0.65s cubic-bezier(0.4,0,0.2,1) ${index*70}ms`,
+      }}
+    >
+      {/* Image wrapper */}
+      <div style={{ position:'relative', paddingBottom: isWide?'52%':'72%', overflow:'hidden', background:'#f0f0f0' }}>
+
+        {/* Main image — parallax + colour reveal on hover */}
+        <img
+          src={toDirectUrl(project.image)}
+          alt={project.title || ''}
+          loading="lazy"
+          decoding="async"
+          style={{
+            position:'absolute', inset:0,
+            width:'100%', height:'100%',
+            objectFit:'cover',
+            filter: hovered ? 'grayscale(0%) brightness(0.8)' : 'grayscale(100%) brightness(1.0)',
+            transform: hovered
+              ? `scale(1.07) translate(${(mousePos.x-0.5)*-10}px,${(mousePos.y-0.5)*-10}px)`
+              : 'scale(1) translate(0,0)',
+            transition:'filter 0.6s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)',
+          }}
+        />
+
+        {/* Directional vignette — follows mouse */}
+        <div style={{
+          position:'absolute', inset:0,
+          background: hovered
+            ? `radial-gradient(ellipse at ${mousePos.x*100}% ${mousePos.y*100}%, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.54) 100%)`
+            : 'linear-gradient(to top,rgba(0,0,0,0.14),transparent 55%)',
+          transition:'background 0.5s ease',
+          pointerEvents:'none',
+        }} />
+
+        {/* "View Project" label — rises from centre */}
+        <div style={{
+          position:'absolute', inset:0,
+          display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+          gap:10,
+          opacity: hovered ? 1 : 0,
+          transition:'opacity 0.3s ease',
+          pointerEvents:'none',
+        }}>
+          <span style={{
+            fontSize:11, textTransform:'uppercase', letterSpacing:'0.55em',
+            color:'#fff', fontWeight:600,
+            borderBottom:'1px solid rgba(255,255,255,0.8)', paddingBottom:4,
+            fontFamily:'inherit',
+            transform: hovered ? 'translateY(0)' : 'translateY(10px)',
+            transition:'transform 0.38s cubic-bezier(0.4,0,0.2,1)',
+            display:'inline-block',
+          }}>View Project</span>
+          {allCount > 1 && (
+            <span style={{
+              fontSize:9, color:'rgba(255,255,255,0.55)',
+              letterSpacing:'0.2em', textTransform:'uppercase',
+              fontFamily:'inherit',
+              transform: hovered ? 'translateY(0)' : 'translateY(10px)',
+              transition:'transform 0.4s cubic-bezier(0.4,0,0.2,1) 0.04s',
+              display:'inline-block',
+            }}>{allCount} photos</span>
+          )}
+        </div>
+
+        {/* Top-left — category chip (hides on hover) */}
+        <div style={{
+          position:'absolute', top:14, left:14,
+          background:'rgba(0,0,0,0.42)',
+          padding:'5px 12px',
+          fontSize:8, textTransform:'uppercase', letterSpacing:'0.22em',
+          color:'rgba(255,255,255,0.82)',
+          fontFamily:'inherit',
+          opacity: hovered ? 0 : 1,
+          transform: hovered ? 'translateY(-5px)' : 'translateY(0)',
+          transition:'opacity 0.22s ease, transform 0.22s ease',
+          pointerEvents:'none',
+        }}>{project.category}</div>
+
+        {/* Top-right — photo count (hides on hover) */}
+        {allCount > 1 && (
+          <div style={{
+            position:'absolute', top:14, right:14,
+            background:'rgba(0,0,0,0.42)',
+            padding:'5px 12px',
+            fontSize:8, textTransform:'uppercase', letterSpacing:'0.15em',
+            color:'rgba(255,255,255,0.7)',
+            fontFamily:'inherit',
+            opacity: hovered ? 0 : 1,
+            transform: hovered ? 'translateY(-5px)' : 'translateY(0)',
+            transition:'opacity 0.22s ease 0.03s, transform 0.22s ease 0.03s',
+            pointerEvents:'none',
+          }}>{allCount} photos</div>
+        )}
+
+        {/* Animated border on hover */}
+        <div style={{
+          position:'absolute', inset:0,
+          border: hovered ? '1px solid rgba(255,255,255,0.2)' : '1px solid transparent',
+          transition:'border-color 0.4s ease',
+          pointerEvents:'none',
+        }} />
+      </div>
+    </div>
+  );
+};
+
+/* ─── SHIMMER SKELETON ──────────────────────────────────────── */
 const SkeletonCard = ({ wide }) => (
-  <div style={{ gridColumn: wide ? 'span 2 / span 2' : undefined, animation:'pulse 1.4s ease-in-out infinite' }}>
-    <div style={{ width:'100%', paddingBottom: wide ? '50%' : '75%', background:'#f0f0f0' }} />
-    <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.45}}`}</style>
+  <div style={{ gridColumn: wide ? 'span 2 / span 2' : undefined }}>
+    <div style={{
+      width:'100%', paddingBottom: wide ? '52%' : '72%',
+      background:'linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%)',
+      backgroundSize:'200% 100%',
+      animation:'shimmer 1.5s ease-in-out infinite',
+    }} />
+    <style>{`@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
   </div>
 );
 
-/* ─── PORTFOLIO ─────────────────────────────────────────────── */
+/* ─── PORTFOLIO SECTION ─────────────────────────────────────── */
 const Portfolio = () => {
   const [filter, setFilter]         = useState('All');
   const [projects, setProjects]     = useState(_cache || []);
   const [loading, setLoading]       = useState(!_cache);
   const [loadFailed, setLoadFailed] = useState(false);
   const [selected, setSelected]     = useState(null);
-  const [hoveredId, setHoveredId]   = useState(null);
   const categories = ['All', 'Residential', 'Commercial'];
 
   const fetchProjects = useCallback(() => {
@@ -241,7 +372,6 @@ const Portfolio = () => {
       <section id="portfolio" className="py-40 bg-white">
         <div className="max-w-7xl mx-auto px-6 md:px-16">
 
-          {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-baseline mb-20 border-b border-black/5 pb-12 gap-8">
             <h2 data-scroll-anchor className="text-5xl md:text-7xl font-serif italic">Selected Works</h2>
             <div className="flex flex-wrap gap-10">
@@ -255,15 +385,15 @@ const Portfolio = () => {
             </div>
           </div>
 
-          {/* Pure photo grid */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:'3px' }}>
+          {/* 2-col photo grid with 4px gap */}
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'4px' }}>
             {loading
               ? [0,1,2,3].map(i => <SkeletonCard key={i} wide={i===0} />)
               : loadFailed
                 ? (
-                  <div style={{ gridColumn:'span 2 / span 2', textAlign:'center', padding:'80px 0' }} className="space-y-6">
+                  <div style={{ gridColumn:'span 2/span 2', textAlign:'center', padding:'80px 0' }} className="space-y-6">
                     <p className="text-sm text-black/40 uppercase tracking-widest">Could not load projects.</p>
-                    <button onClick={() => { _cache = null; fetchProjects(); }}
+                    <button onClick={()=>{ _cache=null; fetchProjects(); }}
                       className="text-[10px] uppercase tracking-[0.3em] border-b border-black pb-1 hover:opacity-50 transition-opacity">
                       Retry
                     </button>
@@ -271,77 +401,20 @@ const Portfolio = () => {
                 )
                 : filtered.length === 0
                   ? (
-                    <div style={{ gridColumn:'span 2 / span 2', textAlign:'center', padding:'80px 0' }}>
+                    <div style={{ gridColumn:'span 2/span 2', textAlign:'center', padding:'80px 0' }}>
                       <p className="text-sm text-black/40 uppercase tracking-widest">Coming Soon...</p>
                     </div>
                   )
                   : filtered.map((p, i) => (
-                    <div key={p.id||i}
-                      onClick={() => setSelected(p)}
-                      onMouseEnter={() => setHoveredId(p.id)}
-                      onMouseLeave={() => setHoveredId(null)}
-                      style={{
-                        cursor: 'pointer',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        gridColumn: i === 0 ? 'span 2 / span 2' : undefined,
-                      }}
-                    >
-                      <div style={{
-                        position: 'relative',
-                        paddingBottom: i === 0 ? '52%' : '72%',
-                        overflow: 'hidden',
-                        background: '#f4f4f4',
-                      }}>
-                        <img
-                          src={toDirectUrl(p.image)}
-                          alt={p.title}
-                          loading="lazy"
-                          decoding="async"
-                          style={{
-                            position:'absolute', inset:0,
-                            width:'100%', height:'100%',
-                            objectFit:'cover',
-                            transform: hoveredId===p.id ? 'scale(1.04)' : 'scale(1)',
-                            filter: hoveredId===p.id ? 'grayscale(0%)' : 'grayscale(100%)',
-                            transition:'transform 0.6s cubic-bezier(0.4,0,0.2,1), filter 0.45s ease',
-                          }}
-                        />
-
-                        {/* Hover overlay */}
-                        <div style={{
-                          position:'absolute', inset:0,
-                          background:'rgba(0,0,0,0.22)',
-                          display:'flex', alignItems:'center', justifyContent:'center',
-                          opacity: hoveredId===p.id ? 1 : 0,
-                          transition:'opacity 0.3s ease',
-                        }}>
-                          <span style={{
-                            color:'#fff', fontSize:10,
-                            textTransform:'uppercase', letterSpacing:'0.5em',
-                            borderBottom:'1px solid rgba(255,255,255,0.7)', paddingBottom:3,
-                            transform: hoveredId===p.id ? 'translateY(0)' : 'translateY(8px)',
-                            transition:'transform 0.3s ease',
-                          }}>View</span>
-                        </div>
-
-                        {/* Photo count */}
-                        {p.images && p.images.length > 0 && (
-                          <span style={{
-                            position:'absolute', bottom:12, right:12,
-                            background:'rgba(0,0,0,0.48)', color:'#fff',
-                            fontSize:9, padding:'4px 10px',
-                            letterSpacing:'0.15em', textTransform:'uppercase',
-                          }}>
-                            {p.images.length + 1} photos
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                    <ProjectCard
+                      key={p.id || i}
+                      project={p}
+                      index={i}
+                      onOpen={() => setSelected(p)}
+                    />
                   ))
             }
           </div>
-
         </div>
       </section>
 
