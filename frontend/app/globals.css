@@ -17,6 +17,11 @@ body {
   margin: 0;
 }
 
+/* All interactive elements — cursor hidden, GSAP cursor handles it */
+a, button, [role="button"] {
+  cursor: none;
+}
+
 .font-serif {
   font-family: var(--font-playfair), 'Playfair Display', serif;
 }
@@ -47,7 +52,7 @@ section[id] {
 ::-webkit-scrollbar-track  { background: var(--white); }
 ::-webkit-scrollbar-thumb  { background: var(--black); }
 
-/* mobile: restore default cursor */
+/* Restore native cursor on touch devices */
 @media (hover: none) {
-  body { cursor: auto; }
+  body, a, button, [role="button"] { cursor: auto !important; }
 }

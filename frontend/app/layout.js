@@ -1,6 +1,7 @@
 import { Inter, Playfair_Display } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { MagneticCursor } from '@/components/ui/magnetic-cursor';
 import './globals.css';
 
 const inter = Inter({
@@ -44,20 +45,12 @@ export const metadata = {
     description:
       'Bespoke residential architecture and turnkey office interiors in Bengaluru. Precision-led design and complete project execution.',
     url: 'https://apexforgestudio.in/',
-    images: [
-      {
-        url: '/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'ApexForge Studio — Architecture & Interiors',
-      },
-    ],
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'ApexForge Studio — Architecture & Interiors' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'ApexForge Studio | Bespoke Residential Architecture & Turnkey Office Interiors',
-    description:
-      'Luxury architecture studio delivering bespoke residential architecture and turnkey office interiors in Bengaluru.',
+    description: 'Luxury architecture studio delivering bespoke residential architecture and turnkey office interiors in Bengaluru.',
     images: ['/og-image.jpg'],
   },
 };
@@ -66,24 +59,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <head>
-        {/* Performance — preconnect to backend before JS runs */}
         <link rel="preconnect" href="https://apexforge-backend.onrender.com" />
         <link rel="dns-prefetch" href="https://apexforge-backend.onrender.com" />
-
-        {/* Preconnect to image sources */}
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="preconnect" href="https://lh3.googleusercontent.com" />
-
-        {/* Icons */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
         <link rel="canonical" href="https://apexforgestudio.in/" />
         <meta name="theme-color" content="#ffffff" />
-
-        {/* ── Rich Schema.org structured data ── */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -95,8 +80,7 @@ export default function RootLayout({ children }) {
               url: 'https://apexforgestudio.in',
               logo: 'https://apexforgestudio.in/favicon.png',
               image: 'https://apexforgestudio.in/og-image.jpg',
-              description:
-                'Bespoke residential architecture and turnkey office interiors in Bengaluru. Precision-led design and complete project execution.',
+              description: 'Bespoke residential architecture and turnkey office interiors in Bengaluru.',
               address: {
                 '@type': 'PostalAddress',
                 streetAddress: '#34A, 2nd Floor, 22nd Main Rd, HSR Layout',
@@ -105,11 +89,7 @@ export default function RootLayout({ children }) {
                 postalCode: '560102',
                 addressCountry: 'IN',
               },
-              geo: {
-                '@type': 'GeoCoordinates',
-                latitude: '12.9121',
-                longitude: '77.6446',
-              },
+              geo: { '@type': 'GeoCoordinates', latitude: '12.9121', longitude: '77.6446' },
               telephone: '+91-9448815530',
               email: 'shreesha@apexforgestudio.in',
               hasMap: 'https://maps.google.com/?q=HSR+Layout+Bengaluru+560102',
@@ -119,44 +99,15 @@ export default function RootLayout({ children }) {
                 { '@type': 'City', name: 'Bengaluru' },
                 { '@type': 'State', name: 'Karnataka' },
               ],
-              // Tells Google about all three services
               hasOfferCatalog: {
                 '@type': 'OfferCatalog',
                 name: 'Architecture & Interior Design Services',
                 itemListElement: [
-                  {
-                    '@type': 'Offer',
-                    itemOffered: {
-                      '@type': 'Service',
-                      name: 'Pure Residential Architecture',
-                      description:
-                        'Bespoke residential architecture from initial concept to final finishing touch. End-to-end home design and build management.',
-                      url: 'https://apexforgestudio.in/#services',
-                    },
-                  },
-                  {
-                    '@type': 'Offer',
-                    itemOffered: {
-                      '@type': 'Service',
-                      name: 'Turnkey Office Interiors & Design Build',
-                      description:
-                        'Comprehensive office interior solutions engineered for productivity. Space planning, 3D visualization, material procurement and full execution.',
-                      url: 'https://apexforgestudio.in/#services',
-                    },
-                  },
-                  {
-                    '@type': 'Offer',
-                    itemOffered: {
-                      '@type': 'Service',
-                      name: 'General Contracting',
-                      description:
-                        'High-precision execution for large-scale projects. Expert oversight, vendor management and structural supervision.',
-                      url: 'https://apexforgestudio.in/#services',
-                    },
-                  },
+                  { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Pure Residential Architecture', url: 'https://apexforgestudio.in/#services' } },
+                  { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Turnkey Office Interiors & Design Build', url: 'https://apexforgestudio.in/#services' } },
+                  { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'General Contracting', url: 'https://apexforgestudio.in/#services' } },
                 ],
               },
-              // Contact point — helps Google surface your contact info
               contactPoint: {
                 '@type': 'ContactPoint',
                 telephone: '+91-9448815530',
@@ -166,57 +117,36 @@ export default function RootLayout({ children }) {
                 areaServed: 'IN',
                 url: 'https://apexforgestudio.in/#contact',
               },
-              // Portfolio section
-              mainEntity: {
-                '@type': 'ItemList',
-                name: 'Architecture Portfolio',
-                description: 'Selected residential and commercial architecture projects by ApexForge Studio.',
-                url: 'https://apexforgestudio.in/#portfolio',
-                itemListElement: [
-                  {
-                    '@type': 'ListItem',
-                    position: 1,
-                    name: 'Residential Architecture Projects',
-                    url: 'https://apexforgestudio.in/#portfolio',
-                  },
-                  {
-                    '@type': 'ListItem',
-                    position: 2,
-                    name: 'Commercial Architecture Projects',
-                    url: 'https://apexforgestudio.in/#portfolio',
-                  },
-                ],
-              },
-              // Process section
-              knowsAbout: [
-                'Residential Architecture',
-                'Office Interior Design',
-                'Turnkey Construction',
-                'Space Planning',
-                '3D Visualization',
-                'General Contracting',
-                'Biophilic Design',
-                'Luxury Interiors',
-              ],
-              // Social profiles
-              sameAs: [
-                'https://www.instagram.com/apexforgestudio',
-                'https://www.linkedin.com/company/apexforgestudio',
-              ],
-              // Founder / key person
-              employee: {
-                '@type': 'Person',
-                name: 'Shreesha J',
-                jobTitle: 'Principal Architect',
-                telephone: '+91-9448815530',
-                email: 'shreesha@apexforgestudio.in',
-              },
+              sameAs: ['https://www.instagram.com/apexforgestudio', 'https://www.linkedin.com/company/apexforgestudio'],
+              employee: { '@type': 'Person', name: 'Shreesha J', jobTitle: 'Principal Architect', telephone: '+91-9448815530', email: 'shreesha@apexforgestudio.in' },
             }),
           }}
         />
       </head>
       <body>
-        {children}
+        {/*
+          MagneticCursor wraps the entire app.
+          - blendMode="exclusion" + cursorColor="white" → auto-inverts:
+              white dot on black sections, black dot on white sections
+          - cursorSize=40 → a visible but refined dot
+          - magneticFactor=0.55 → strong but not silly pull
+          - Any element with data-magnetic snaps the cursor to its bounds
+        */}
+        <MagneticCursor
+          cursorSize={40}
+          cursorColor="white"
+          blendMode="exclusion"
+          magneticFactor={0.55}
+          lerpAmount={0.12}
+          hoverPadding={10}
+          speedMultiplier={0.025}
+          maxScaleX={0.8}
+          maxScaleY={0.25}
+          contrastBoost={1.8}
+          shape="circle"
+        >
+          {children}
+        </MagneticCursor>
         <Analytics />
         <SpeedInsights />
       </body>
