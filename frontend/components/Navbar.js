@@ -63,58 +63,74 @@ const Navbar = () => {
           isScrolled ? 'bg-white/80 backdrop-blur-xl border-b border-black/[0.03] py-4' : 'bg-white py-8'
         }`}
       >
-        <div className="w-full px-6 md:px-16 flex items-center justify-between mx-auto max-w-[1800px]">
-          <div className="flex-shrink-0">
-            <Magnetic strength={0.2}>
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="flex items-center"
-              >
-                <Logo />
-              </button>
-            </Magnetic>
-          </div>
-
-          <div className="hidden md:flex items-center space-x-2">
-            {navItems.map((item) => {
-              const isActive = activeSection === item.id;
-              return (
-                <Magnetic key={item.id} strength={0.2}>
-                  <button
-                    data-magnetic
-                    onClick={() => scrollTo(item.id)}
-                    className={`px-5 py-2 rounded-full text-[10px] uppercase tracking-[0.4em] font-medium transition-all duration-500 ${
-                      isActive
-                        ? 'text-black bg-black/[0.04] border border-black/10'
-                        : 'text-black/40 hover:text-black border border-transparent'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                </Magnetic>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center gap-6 flex-shrink-0">
-            <Magnetic strength={0.3}>
-              <button
-                data-magnetic
-                onClick={() => scrollTo('contact')}
-                className="px-8 md:px-12 py-3 bg-black text-white text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-black/80 transition-all shadow-xl shadow-black/5"
-              >
-                Inquire
-              </button>
-            </Magnetic>
+        <div className="w-full px-6 md:px-16 grid grid-cols-3 md:flex items-center md:justify-between mx-auto max-w-[1800px]">
+          
+          {/* LEFT: Mobile Menu Toggle / Desktop Logo */}
+          <div className="flex items-center order-1 md:order-none">
             <button
               onClick={() => setMenuOpen((p) => !p)}
-              className="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-[5px]"
+              className="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-[5px] -ml-2"
               aria-label="Toggle menu"
             >
               <span className={`block w-6 h-[1.5px] bg-black transition-all duration-300 origin-center ${menuOpen ? 'rotate-45 translate-y-[6.5px]' : ''}`} />
               <span className={`block w-6 h-[1.5px] bg-black transition-all duration-300 ${menuOpen ? 'opacity-0 scale-x-0' : ''}`} />
               <span className={`block w-6 h-[1.5px] bg-black transition-all duration-300 origin-center ${menuOpen ? '-rotate-45 -translate-y-[6.5px]' : ''}`} />
             </button>
+            <div className="hidden md:block flex-shrink-0">
+              <Magnetic strength={0.2}>
+                <button
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="flex items-center"
+                >
+                  <Logo />
+                </button>
+              </Magnetic>
+            </div>
+          </div>
+
+          {/* CENTER: Mobile Logo / Desktop Nav-Links */}
+          <div className="flex justify-center items-center order-2 md:order-none">
+            <div className="md:hidden">
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="flex items-center h-8"
+              >
+                <Logo />
+              </button>
+            </div>
+            <div className="hidden md:flex items-center space-x-2">
+              {navItems.map((item) => {
+                const isActive = activeSection === item.id;
+                return (
+                  <Magnetic key={item.id} strength={0.2}>
+                    <button
+                      data-magnetic
+                      onClick={() => scrollTo(item.id)}
+                      className={`px-5 py-2 rounded-full text-[10px] uppercase tracking-[0.4em] font-medium transition-all duration-500 ${
+                        isActive
+                          ? 'text-black bg-black/[0.04] border border-black/10'
+                          : 'text-black/40 hover:text-black border border-transparent'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  </Magnetic>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* RIGHT: Inquire Button (Both) */}
+          <div className="flex justify-end items-center order-3 md:order-none">
+            <Magnetic strength={0.3}>
+              <button
+                data-magnetic
+                onClick={() => scrollTo('contact')}
+                className="px-6 md:px-12 py-2.5 md:py-3 bg-black text-white text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-black/80 transition-all shadow-xl shadow-black/5"
+              >
+                Inquire
+              </button>
+            </Magnetic>
           </div>
         </div>
       </nav>
