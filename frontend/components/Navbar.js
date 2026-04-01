@@ -120,17 +120,19 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* RIGHT: Inquire Button (Both) */}
-          <div className="flex justify-end items-center order-3 md:order-none">
-            <Magnetic strength={0.3}>
-              <button
-                data-magnetic
-                onClick={() => scrollTo('contact')}
-                className="px-6 md:px-12 py-2.5 md:py-3 bg-black text-white text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-black/80 transition-all shadow-xl shadow-black/5"
-              >
-                Inquire
-              </button>
-            </Magnetic>
+          {/* RIGHT: Empty (was Inquire) */}
+          <div className="md:flex justify-end items-center order-3 md:order-none">
+            <div className="hidden md:block">
+              <Magnetic strength={0.3}>
+                <button
+                  data-magnetic
+                  onClick={() => scrollTo('contact')}
+                  className="px-12 py-3 bg-black text-white text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-black/80 transition-all shadow-xl shadow-black/5"
+                >
+                  Inquire
+                </button>
+              </Magnetic>
+            </div>
           </div>
         </div>
       </nav>
@@ -165,6 +167,17 @@ const Navbar = () => {
               {item.label}
             </button>
           ))}
+          <button
+            onClick={() => scrollTo('contact')}
+            className="mt-20 px-16 py-8 bg-black text-white text-[12px] uppercase tracking-[0.4em] font-bold hover:bg-black/90 transition-all duration-500 w-full shadow-2xl shadow-black/10"
+            style={{
+              transitionDelay: menuOpen ? `${navItems.length * 80 + 200}ms` : '0ms',
+              transform: menuOpen ? 'translateY(0)' : 'translateY(30px)',
+              opacity: menuOpen ? 1 : 0,
+            }}
+          >
+            Inquire
+          </button>
         </nav>
       </div>
     </>
