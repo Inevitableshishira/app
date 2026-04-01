@@ -165,17 +165,6 @@ const Navbar = () => {
               {item.label}
             </button>
           ))}
-          <button
-            onClick={() => scrollTo('contact')}
-            className="mt-20 px-16 py-8 bg-black text-white text-[12px] uppercase tracking-[0.4em] font-bold hover:bg-black/90 transition-all duration-500 w-full shadow-2xl shadow-black/10"
-            style={{
-              transitionDelay: menuOpen ? `${navItems.length * 80 + 200}ms` : '0ms',
-              transform: menuOpen ? 'translateY(0)' : 'translateY(30px)',
-              opacity: menuOpen ? 1 : 0,
-            }}
-          >
-            Inquire
-          </button>
         </nav>
       </div>
     </>
