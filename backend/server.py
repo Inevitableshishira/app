@@ -14,14 +14,17 @@ import resend
 import os
 import uuid
 import logging
+from googleapiclient.discovery import build
 
 # ================= ENV =================
 
 MONGO_URL      = os.environ.get("MONGO_URL")
 DB_NAME        = os.environ.get("DB_NAME", "apexforge")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
-
 resend.api_key = RESEND_API_KEY
+
+GOOGLE_DRIVE_FOLDER_ID = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
+GOOGLE_API_KEY         = os.environ.get("GOOGLE_API_KEY")
 
 # ================= APP =================
 
@@ -248,7 +251,61 @@ async def delete_inquiry(inquiry_id: str, _: str = Depends(get_current_admin)):
     result = await db.inquiries.delete_one({"id": inquiry_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Inquiry not found")
-    return {"message": "Inquiry deleted"}
+# ================= SETTINGS =================
+
+@api_router.get("/settings")
+async def get_settings():
+    settings = await db.settings.find_one({"id": "global"}, {"_id": 0})
+    if not settings:
+        return {
+            "google_drive_folder_id": GOOGLE_DRIVE_FOLDER_ID,
+            "google_api_key": GOOGLE_API_KEY
+        }
+    return settings
+
+@api_router.put("/admin/settings")
+async def update_settings(data: dict, _: str = Depends(get_current_admin)):
+    await db.settings.update_one({"id": "global"}, {"$set": data}, upsert=True)
+    return {"message": "Settings updated"}
+
+# ================= DRIVE ASSETS =================
+
+@api_router.get("/images", response_model=List[str])
+async def get_drive_images():
+    # Try database first, then fallback to env
+    settings = await db.settings.find_one({"id": "global"})
+    folder_id = settings.get("google_drive_folder_id") if settings else GOOGLE_DRIVE_FOLDER_ID
+    api_key   = settings.get("google_api_key") if settings else GOOGLE_API_KEY
+
+    if not api_key or not folder_id:
+        logging.warning("Google Drive credentials not set. Returning empty list.")
+        return []
+
+    try:
+        service = build('drive', 'v3', developerKey=api_key)
+        query   = f"'{folder_id}' in parents and trashed = false and (mimeType contains 'image/')"
+        results = service.files().list(
+            q=query,
+            pageSize=100,
+            fields="files(id, name, mimeType)"
+        ).execute()
+
+        files = results.get('files', [])
+        allowed_extensions = {'.jpg', '.jpeg', '.png', '.webp'}
+        image_urls = []
+
+        for f in files:
+            name = f.get('name', '').lower()
+            if any(name.endswith(ext) for ext in allowed_extensions):
+                # Generate direct viewing link for Google Drive (lh3 structure is more stable for <img>)
+                # Format: https://lh3.googleusercontent.com/d/{file_id}
+                image_urls.append(f"https://lh3.googleusercontent.com/d/{f['id']}")
+
+        return image_urls
+
+    except Exception as e:
+        logging.error(f"Failed to fetch drive images: {str(e)}")
+        return []
 
 # ================= CORS =================
 
