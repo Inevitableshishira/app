@@ -1,3 +1,5 @@
+const { withSentryConfig } = require("@sentry/nextjs");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -11,4 +13,18 @@ const nextConfig = {
   compress: true,
 };
 
-module.exports = nextConfig;
+module.exports = withSentryConfig(nextConfig, {
+  // your Sentry configuration
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  
+  // Upload wider set of client source files for better stack trace resolution
+  widenClientFileUpload: true,
+  
+  // Create a proxy API route to bypass ad-blockers
+  tunnelRoute: "/monitoring",
+  
+  // Suppress non-CI output
+  silent: !process.env.CI,
+});
