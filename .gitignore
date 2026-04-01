@@ -1,13 +1,10 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # IDE and editors
 .idea/
 .vscode/
 
 # Dependencies
 node_modules/
-/node_modules
-/.pnp
+.pnp
 .pnp.js
 .yarn/install-state.gz
 .yarn/*
@@ -16,22 +13,25 @@ node_modules/
 !.yarn/releases
 !.yarn/versions
 
-# Testing
+# Testing and Reports
 /coverage
+test_reports/
+test_result.md
+backend_test.py
+tests/__pycache__/
 
-# Next.js
-/.next/
+# Next.js and frontend builds
+.next/
 /out/
 next-env.d.ts
 *.tsbuildinfo
-
-# Production builds
 /build
 dist/
-dist
 
-# Environment files (comprehensive coverage)
-
+# Environment files
+.env
+.env.local
+.env.*
 *token.json*
 *credentials.json*
 
@@ -44,15 +44,27 @@ dump.rdb
 
 # System files
 .DS_Store
+Thumbs.db
 *.pem
 
 # Python
 __pycache__/
-*pyc*
+*.pyc
 venv/
 .venv/
 
-# Development tools
+# AI Assistant / Tooling Metadata (VibeCheck, Claude, Cursor, etc.)
+.claude/
+.cursor/
+.islstudio/
+.vibecheck/
+CLAUDE.md
+workflows/
+memory/
+.nvmrc
+.vibecheck
+
+# Other development tools
 chainlit.md
 .chainlit
 .ipynb_checkpoints/
@@ -77,4 +89,4 @@ agenthub/agents/youtube/db
 .cache/
 
 # Mobile development
-android-sdk/ 
+android-sdk/
