@@ -16,13 +16,14 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center bg-white overflow-hidden border-b border-black/5 pt-28">
-      <div className="absolute right-0 top-0 w-full lg:w-1/2 h-full z-0 overflow-hidden">
+      <div className="absolute right-0 top-0 w-full lg:w-1/2 h-full z-0 overflow-hidden bg-stone-50">
         <Image
-          src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&q=60&w=1200"
+          src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&q=80&w=1200"
           alt="Architectural space"
           fill
           priority
-          className="object-cover img-grayscale opacity-20 lg:opacity-100"
+          fetchPriority="high"
+          className="object-cover img-grayscale opacity-20 lg:opacity-100 transition-opacity duration-1000"
           sizes="(max-width: 1024px) 100vw, 50vw"
         />
       </div>

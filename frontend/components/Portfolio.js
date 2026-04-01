@@ -107,14 +107,16 @@ const ProjectCard = ({ src, index, onOpen }) => {
       style={{ gridColumn: isWide ? 'span 2/span 2' : undefined }}
     >
       <div className="relative overflow-hidden" style={{ paddingBottom:isWide?'52%':'75%' }}>
-        <img
+        <Image
           src={src}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-out"
+          fill
+          className="object-cover transition-all duration-1000 ease-out"
           style={{
             filter: hovered ? 'grayscale(0%) brightness(0.9)' : 'grayscale(100%) brightness(1)',
             transform: hovered ? `scale(1.1) translate(${(mousePos.x-0.5)*-15}px,${(mousePos.y-0.5)*-15}px)` : 'scale(1) translate(0,0)',
           }}
+          sizes="(max-width: 1024px) 100vw, 50vw"
           loading="lazy"
         />
         <div className={`absolute inset-0 bg-black/20 transition-opacity duration-700 ${hovered ? 'opacity-100' : 'opacity-0'}`} />
